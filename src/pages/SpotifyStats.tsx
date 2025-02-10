@@ -3,13 +3,12 @@ import { generateClient } from "aws-amplify/api";
 import { getCurrentUser } from "@aws-amplify/auth";
 import { Authenticator, Button } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-import { createSpotifyUserToken } from "../graphql/mutations";
 import { spotifyUserTokensByUserId } from "../graphql/queries"; 
 
 const API_URL = "https://api.spotify.com/v1/me/top/artists?limit=10";
-const REDIRECT_URI = encodeURIComponent("http://localhost:3000/callback");
+//const REDIRECT_URI = encodeURIComponent("http://localhost:3000/callback");
+const REDIRECT_URI = encodeURIComponent("http://jaxsoncodes/callback");
 const CLIENT_ID = "00ed30d4fa214614be034225cd52f0fb";
-const TOKEN_REFRESH_URL = "https://accounts.spotify.com/api/token";
 
 // ✅ Create GraphQL Client
 const client = generateClient();
@@ -18,126 +17,67 @@ const SpotifyStats: React.FC = () => {
   const [topArtists, setTopArtists] = useState<{ name: string; image: string }[]>([]);
   const [user, setUser] = useState<any>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserAndTokens = async () => {
       try {
+        console.log("🔄 Fetching authenticated user...");
         const authUser = await getCurrentUser();
         setUser(authUser);
-      } catch {
-        setUser(null);
-      }
-    };
 
-    fetchUser();
-  }, []);
+        if (!authUser) {
+          console.warn("⚠️ No authenticated user found!");
+          return;
+        }
 
-  useEffect(() => {
-    if (!user) return;
+        console.log("✅ User found:", authUser.username);
 
-    
-
-    const fetchTokensFromDB = async () => {
-      try {
-        console.log("Fetching tokens for user:", user.username);
-    
+        console.log("🔄 Fetching Spotify tokens from DynamoDB...");
         const result = await client.graphql({
           query: spotifyUserTokensByUserId, 
-          variables: { userId: "jaxson" },
+          variables: { userId: authUser.username },
         });
-    
-        console.log("DynamoDB Query Result:", JSON.stringify(result, null, 2)); // 🔍 Log Full Response
-    
+
+        console.log("📦 DynamoDB Query Result:", JSON.stringify(result, null, 2));
+
         const tokens = result.data?.spotifyUserTokensByUserId?.items || [];
-        
+
         if (tokens.length > 0) {
           setAccessToken(tokens[0]?.accessToken || null);
-          setRefreshToken(tokens[0]?.refreshToken || null);
+          console.log("✅ Access token set. Fetching top artists...");
+          fetchTopArtists(tokens[0]?.accessToken);
         } else {
-          console.log("No token found for this user.");
+          console.log("❌ No token found. Redirecting to Spotify Auth...");
           redirectToSpotifyAuth();
         }
       } catch (error) {
-        console.error("Error fetching tokens from DynamoDB:", error);
+        console.error("❌ Error fetching user or tokens:", error);
       }
     };
-    
 
-    console.log("LOGGING HERE")
-    fetchTokensFromDB();
-  }, [user]);
+    fetchUserAndTokens();
+  }, []);
 
   const redirectToSpotifyAuth = () => {
     window.location.href = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=user-top-read&response_type=code&show_dialog=true`;
   };
 
-  const refreshAccessToken = async () => {
-    // if (!refreshToken) {
-    //   console.error("No refresh token available.");
-    //   redirectToSpotifyAuth();
-    //   return;
-    // }
+  const fetchTopArtists = async (token: string | null): Promise<void> => {
+    if (!token) return;
+    console.log("📡 Fetching top artists with access token:", token);
 
-    // console.log("Refreshing Spotify token...");
-    // const authHeader = btoa(`${CLIENT_ID}:${process.env.REACT_APP_SPOTIFY_CLIENT_SECRET}`);
-    // const response = await fetch(TOKEN_REFRESH_URL, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/x-www-form-urlencoded",
-    //     Authorization: `Basic ${authHeader}`,
-    //   },
-    //   body: new URLSearchParams({
-    //     grant_type: "refresh_token",
-    //     refresh_token: refreshToken,
-    //   }),
-    // });
-
-    // if (!response.ok) {
-    //   console.error("Failed to refresh access token.");
-    //   redirectToSpotifyAuth();
-    //   return;
-    // }
-
-    // const data = await response.json();
-    // const newAccessToken = data.access_token;
-
-    // // Update state and DynamoDB
-    // setAccessToken(newAccessToken);
-
-    // try {
-    //   await client.graphql({
-    //     query: createSpotifyUserToken,
-    //     variables: {
-    //       input: {
-    //         userId: user.username,
-    //         accessToken: newAccessToken,
-    //         refreshToken,
-    //       },
-    //     },
-    //   });
-    //   console.log("Token successfully refreshed and stored in DynamoDB.");
-    // } catch (error) {
-    //   console.error("Error storing refreshed token:", error);
-    // }
-  };
-
-  const fetchTopArtists = async (): Promise<void> => {
-    if (!accessToken) return;
-    console.log("Fetching top artists with accescode: ", accessToken);
-  
     try {
       const response = await fetch(API_URL, {
         method: "GET",
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       if (response.status === 401) {
-        console.warn("Spotify token expired. Attempting refresh...");
-        // await refreshAccessToken();
-        // return fetchTopArtists(); // Retry request after refreshing token
+        console.warn("⚠️ Spotify token expired. Redirecting to Spotify Auth...");
+        //redirectToSpotifyAuth();
+        //return;
       }
-  
+
       const data = await response.json();
       if (data.items) {
         setTopArtists(
@@ -146,18 +86,12 @@ const SpotifyStats: React.FC = () => {
             image: artist.images[0]?.url || "",
           }))
         );
+        console.log("✅ Successfully fetched top artists!");
       }
     } catch (err) {
-      console.error("Error fetching top artists:", err);
+      console.error("❌ Error fetching top artists:", err);
     }
   };
-  
-
-  useEffect(() => {
-    if (accessToken) {
-      fetchTopArtists();
-    }
-  }, [accessToken]);
 
   return (
     <Authenticator>
