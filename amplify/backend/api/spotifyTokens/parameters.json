@@ -1,0 +1,11 @@
+{
+  "AppSyncApiName": "spotifyTokens",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authmyapp38de81b0",
+      "Outputs.UserPoolId"
+    ]
+  }
+}

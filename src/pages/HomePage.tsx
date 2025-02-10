@@ -2,6 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+
+
 const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100">
@@ -116,7 +118,12 @@ const HomePage: React.FC = () => {
                 <p className="text-gray-700 mb-4">
                   An app to explore and visualize your top Spotify artists, songs, and playlists. Integrated with the Spotify API for personalized stats.
                 </p>
-                <span className="text-gray-500 italic">Coming soon...</span>
+                <Link
+                  to="/spotifystats"
+                  className="text-green-500 hover:underline"
+                >
+                  Explore SpotifyStats
+                </Link>
               </div>
             </div>
           </div>

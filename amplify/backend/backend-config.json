@@ -1,0 +1,117 @@
+{
+  "api": {
+    "spotifyApi": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "spotifyAuth"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
+    },
+    "spotifyTokens": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "UserPoolId"
+          ],
+          "category": "auth",
+          "resourceName": "myapp38de81b0"
+        }
+      ],
+      "output": {
+        "authConfig": {
+          "additionalAuthenticationProviders": [],
+          "defaultAuthentication": {
+            "authenticationType": "AMAZON_COGNITO_USER_POOLS",
+            "userPoolConfig": {
+              "userPoolId": "authmyapp38de81b0"
+            }
+          }
+        }
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "AppSync"
+    }
+  },
+  "auth": {
+    "myapp38de81b0": {
+      "customAuth": false,
+      "dependsOn": [],
+      "frontendAuthConfig": {
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyCharacters": [],
+          "passwordPolicyMinLength": 8
+        },
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "socialProviders": [],
+        "usernameAttributes": [],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito"
+    }
+  },
+  "function": {
+    "spotifyAuth": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
+  "parameters": {
+    "AMPLIFY_function_spotifyAuth_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "spotifyAuth"
+        }
+      ]
+    },
+    "AMPLIFY_function_spotifyAuth_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "spotifyAuth"
+        }
+      ]
+    },
+    "AMPLIFY_function_spotifyAuth_spotifyClientId": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "spotifyAuth"
+        }
+      ]
+    },
+    "AMPLIFY_function_spotifyAuth_spotifyClientSecret": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "spotifyAuth"
+        }
+      ]
+    },
+    "AMPLIFY_function_spotifyAuth_spotifyRedirectUri": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "spotifyAuth"
+        }
+      ]
+    }
+  }
+}
