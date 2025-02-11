@@ -26,48 +26,49 @@ const CallbackPage = () => {
     console.log("Entered callback page");
 
     const fetchUserAndSaveToken = async () => {
-      try {
-        const authUser = await getCurrentUser();
-        const authToken = await getAuthToken();
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get("code");
+        try {
+            const authUser = await getCurrentUser();
+            const authToken = await getAuthToken();
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get("code");
 
-        if (code && authUser && authToken) {
-          console.log("Code Grabbed:", code);
+            if (code && authUser && authToken) {
+                console.log("Code Grabbed:", code);
 
-          // ✅ Send code + userId + authToken to Lambda
-          fetch(API_GATEWAY_URL, {
-            method: "POST",
-            headers: { 
-              "Content-Type": "application/json",
-              "Authorization": authToken // No type errors now
-            },
-            body: JSON.stringify({
-              userId: authUser.username, // Unique user identifier
-              code: code,
-            }),
-          })
-            .then((res) => res.json())
-            .then(() => {
-              console.log("Token successfully stored in DynamoDB.");
-              navigate("/spotifystats");
-            })
-            .catch((err) => {
-              console.error("Error storing token:", err);
-              navigate("/");
-            });
-        } else {
-          console.error("Missing code, user, or authToken.");
-          navigate("/");
+                fetch(API_GATEWAY_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": authToken,
+                    },
+                    body: JSON.stringify({
+                        action: "exchangeCode",
+                        userId: authUser.username,
+                        code: code,
+                    }),
+                })
+                    .then((res) => res.json())
+                    .then(() => {
+                        console.log("Token successfully stored in DynamoDB.");
+                        navigate("/spotifystats");
+                    })
+                    .catch((err) => {
+                        console.error("Error storing token:", err);
+                        navigate("/");
+                    });
+            } else {
+                console.error("Missing code, user, or authToken.");
+                navigate("/");
+            }
+        } catch (error) {
+            console.error("Error getting user:", error);
+            navigate("/");
         }
-      } catch (error) {
-        console.error("Error getting user:", error);
-        navigate("/");
-      }
     };
 
     fetchUserAndSaveToken();
-  }, [navigate]);
+}, [navigate]);
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">

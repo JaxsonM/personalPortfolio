@@ -1,25 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { generateClient } from "aws-amplify/api";
-import { getCurrentUser } from "@aws-amplify/auth";
+import { getCurrentUser, fetchAuthSession } from "@aws-amplify/auth";
 import { Authenticator, Button } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-import { spotifyUserTokensByUserId } from "../graphql/queries"; 
+
+const API_GATEWAY_URL = "https://t1ihagcn2k.execute-api.us-east-1.amazonaws.com/dev/auth";
 
 const API_URL = "https://api.spotify.com/v1/me/top/artists?limit=10";
 const REDIRECT_URI = encodeURIComponent("http://localhost:3000/callback");
 //const REDIRECT_URI = encodeURIComponent("http://jaxsoncodes/callback");
 const CLIENT_ID = "00ed30d4fa214614be034225cd52f0fb";
 
-// ✅ Create GraphQL Client
-const client = generateClient();
-
 const SpotifyStats: React.FC = () => {
   const [topArtists, setTopArtists] = useState<{ name: string; image: string }[]>([]);
   const [user, setUser] = useState<any>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUserAndTokens = async () => {
+    const fetchUserAndArtists = async () => {
       try {
         console.log("🔄 Fetching authenticated user...");
         const authUser = await getCurrentUser();
@@ -31,65 +27,69 @@ const SpotifyStats: React.FC = () => {
         }
 
         console.log("✅ User found:", authUser.username);
+        console.log("🔄 Fetching top artists from backend...");
 
-        console.log("🔄 Fetching Spotify tokens from DynamoDB...");
-        const result = await client.graphql({
-          query: spotifyUserTokensByUserId, 
-          variables: { userId: authUser.username },
-        });
-
-        console.log("📦 DynamoDB Query Result:", JSON.stringify(result, null, 2));
-
-        const tokens = result.data?.spotifyUserTokensByUserId?.items || [];
-
-        if (tokens.length > 0) {
-          setAccessToken(tokens[0]?.accessToken || null);
-          console.log("✅ Access token set. Fetching top artists...");
-          fetchTopArtists(tokens[0]?.accessToken);
-        } else {
-          console.log("❌ No token found. Redirecting to Spotify Auth...");
-          redirectToSpotifyAuth();
+        const authToken = await getAuthToken();
+        if (!authToken) {
+          console.error("❌ Failed to retrieve authentication token.");
+          return;
         }
+        
+
+        await fetchTopArtists(authUser.username, authToken);
       } catch (error) {
-        console.error("❌ Error fetching user or tokens:", error);
+        console.error("❌ Error fetching user or top artists:", error);
       }
     };
 
-    fetchUserAndTokens();
+    fetchUserAndArtists();
   }, []);
 
+  const getAuthToken = async (): Promise<string | null> => {
+    try {
+      const session = await fetchAuthSession();
+      if (!session.tokens || !session.tokens.idToken) {
+        console.error("No ID token found in session");
+        return null;
+      }
+      return session.tokens.idToken.toString(); // Convert JWT to string
+    } catch (error) {
+      console.error("Error fetching auth token:", error);
+      return null;
+    }
+  };
   const redirectToSpotifyAuth = () => {
     window.location.href = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=user-top-read&response_type=code&show_dialog=true`;
   };
 
-  const fetchTopArtists = async (token: string | null): Promise<void> => {
-    if (!token) return;
-    console.log("📡 Fetching top artists with access token:", token);
+
+  const fetchTopArtists = async (userId: string, authToken: string): Promise<void> => {
+    console.log("📡 Fetching top artists from Lambda function...");
+    //redirectToSpotifyAuth();
 
     try {
-      const response = await fetch(API_URL, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await fetch(API_GATEWAY_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: authToken, // Pass Cognito auth token
+        },
+        body: JSON.stringify({
+          action: "getTopArtists",
+          userId,
+        }),
       });
 
-      if (response.status === 401) {
-        console.warn("⚠️ Spotify token expired. Redirecting to Spotify Auth...");
-        //redirectToSpotifyAuth();
-        //return;
+      if (!response.ok) {
+        console.error("❌ Error fetching top artists. Status:", response.status);
+        return;
       }
 
       const data = await response.json();
-      if (data.items) {
-        setTopArtists(
-          data.items.map((artist: any) => ({
-            name: artist.name,
-            image: artist.images[0]?.url || "",
-          }))
-        );
-        console.log("✅ Successfully fetched top artists!");
-      }
+      setTopArtists(data);
+      console.log("✅ Successfully fetched top artists!");
     } catch (err) {
-      console.error("❌ Error fetching top artists:", err);
+      console.error("❌ Error fetching top artists from backend:", err);
     }
   };
 
