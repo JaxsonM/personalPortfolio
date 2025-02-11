@@ -53,8 +53,8 @@ exports.handler = async (event) => {
     }
 };
 
-// ✅ Function to Fetch Top Artists from AppSync
-async function fetchTopArtists(userId, authToken) {
+// ✅ Function to Retrieve Access Token from AppSync
+async function getAccessToken(userId, authToken) {
     console.log("🔍 Fetching Spotify tokens for user:", userId);
 
     const query = `
@@ -65,12 +65,9 @@ async function fetchTopArtists(userId, authToken) {
                 accessToken
                 refreshToken
                 expiresAt
-                createdAt
-                updatedAt
             }
         }
     }`;
-
 
     console.log("📡 Sending GraphQL request to fetch tokens...");
 
@@ -78,9 +75,100 @@ async function fetchTopArtists(userId, authToken) {
     try {
         queryResponse = await axios.post(
             GRAPHQL_ENDPOINT,
+            { query, variables: { userId, limit: 1 } },
+            { headers: { Authorization: authToken, "Content-Type": "application/json" } }
+        );
+    } catch (error) {
+        console.error("❌ GraphQL Query Failed:", error.response?.data || error.message);
+        return null;
+    }
+
+    console.log("📦 GraphQL Response:", JSON.stringify(queryResponse.data, null, 2));
+
+    if (!queryResponse.data?.data?.spotifyUserTokensByUserId?.items.length) {
+        console.error("❌ No Spotify token found for user");
+        return null;
+    }
+
+    let { accessToken, refreshToken, expiresAt } = queryResponse.data.data.spotifyUserTokensByUserId.items[0];
+
+    return accessToken;
+}
+
+
+// ✅ Function to Fetch Top Artists
+async function fetchTopArtists(userId, authToken) {
+    console.log("📡 Fetching top artists for user:", userId);
+
+    let accessToken = await getAccessToken(userId, authToken);
+    if (!accessToken) return errorResponse(404, "No valid access token found");
+    console.log("✅ Access token secured.");
+
+    try {
+        console.log("🎵 Fetching top artists from Spotify...");
+        const response = await axios.get(SPOTIFY_API_URL, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        return successResponse(
+            response.data.items.map((artist) => ({
+                name: artist.name,
+                image: artist.images[0]?.url || "",
+            }))
+        );
+    } catch (error) {
+        if (error.response && error.response.status === 401) {
+            console.warn("⚠️ Access token expired! Attempting to refresh...");
+
+            accessToken = await refreshSpotifyToken(userId, authToken);
+            if (!accessToken) return errorResponse(401, "Failed to refresh access token");
+            console.log("NEWWWW TOKEN HERE NEW REQUEST WITH NEW TOKEN")
+            console.log("New access token:", accessToken);
+
+            console.log("🔄 Retrying request with new access token...");
+            try {
+                const retryResponse = await axios.get(SPOTIFY_API_URL, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
+
+                return successResponse(
+                    retryResponse.data.items.map((artist) => ({
+                        name: artist.name,
+                        image: artist.images[0]?.url || "",
+                    }))
+                );
+            } catch (retryError) {
+                console.error("❌ Failed even after token refresh:", retryError.message);
+                return errorResponse(500, "Failed to fetch top artists after token refresh");
+            }
+        }
+
+        console.error("❌ Error fetching top artists:", error.message);
+        return errorResponse(500, "Error fetching top artists");
+    }
+}
+
+// ✅ Function to Get Refresh Token
+async function getRefreshToken(userId, authToken) {
+    console.log(`🔍 Retrieving refresh token for user: ${userId}`);
+
+    const query = `
+    query SpotifyUserTokensByUserId($userId: String!, $limit: Int) {
+        spotifyUserTokensByUserId(userId: $userId, limit: $limit) {
+            items {
+                accessToken
+                refreshToken
+                expiresAt
+            }
+        }
+    }`;
+
+    try {
+        const response = await axios.post(
+            GRAPHQL_ENDPOINT,
             {
                 query,
-                variables: { userId, limit: 1, sortDirection: "DESC" },  // Ensure correct sorting
+                variables: { userId, limit: 1 },
             },
             {
                 headers: {
@@ -89,26 +177,106 @@ async function fetchTopArtists(userId, authToken) {
                 },
             }
         );
-    } catch (error) {
-        console.error("❌ GraphQL Query Failed:", error.response?.data || error.message);
-        return errorResponse(500, "Failed to fetch tokens from AppSync");
-    }
 
-    console.log("📦 GraphQL Response:", JSON.stringify(queryResponse.data, null, 2));
+        if (!response.data?.data?.spotifyUserTokensByUserId?.items.length) {
+            console.error("❌ No stored refresh token found for user");
+            return null;
+        }
+
+        const { refreshToken } = response.data.data.spotifyUserTokensByUserId.items[0];
+
+        if (!refreshToken) {
+            console.error("❌ Missing refresh token in stored data");
+            return null;
+        }
+
+        console.log("✅ Refresh token retrieved successfully");
+        return refreshToken;
+    } catch (error) {
+        console.error("❌ Failed to fetch refresh token:", error.response?.data || error.message);
+        return null;
+    }
+}
+
+// ✅ Function to Update Access Token in AppSync
+async function updateAccessToken(userId, newAccessToken, newExpiresAt, authToken) {
+    console.log(`🔄 Updating access token for user: ${userId}`);
+
+    // Fetch the ID of the existing record first
+    const query = `
+    query SpotifyUserTokensByUserId($userId: String!, $limit: Int) {
+        spotifyUserTokensByUserId(userId: $userId, limit: $limit) {
+            items {
+                id
+                accessToken
+                refreshToken
+                expiresAt
+            }
+        }
+    }`;
+
+    let queryResponse;
+    try {
+        queryResponse = await axios.post(
+            GRAPHQL_ENDPOINT,
+            { query, variables: { userId, limit: 1 } },
+            { headers: { Authorization: authToken, "Content-Type": "application/json" } }
+        );
+    } catch (error) {
+        console.error("❌ Failed to fetch existing token ID:", error.response?.data || error.message);
+        return null;
+    }
 
     if (!queryResponse.data?.data?.spotifyUserTokensByUserId?.items.length) {
-        console.error("❌ No Spotify token found for user");
-        return errorResponse(404, "No token found for user");
+        console.error("❌ No existing token found to update.");
+        return null;
     }
 
-    let { accessToken, refreshToken, expiresAt } = queryResponse.data.data.spotifyUserTokensByUserId.items[0];
+    const existingTokenId = queryResponse.data.data.spotifyUserTokensByUserId.items[0].id;
 
-    console.log("🔄 Checking if token is expired...");
-    const currentTime = Date.now();
+    console.log("🆔 Existing token ID:", existingTokenId);
 
-    if (currentTime >= new Date(expiresAt).getTime()) {
-        console.log("🔄 Token expired, refreshing...");
+    // Update the token in AppSync
+    const mutation = `
+    mutation UpdateSpotifyUserToken($input: UpdateSpotifyUserTokenInput!) {
+        updateSpotifyUserToken(input: $input) {
+            id
+            userId
+            accessToken
+            expiresAt
+        }
+    }`;
 
+    try {
+        const mutationResponse = await axios.post(
+            GRAPHQL_ENDPOINT,
+            {
+                query: mutation,
+                variables: { input: { id: existingTokenId, userId, accessToken: newAccessToken, expiresAt: newExpiresAt } },
+            },
+            {
+                headers: { Authorization: authToken, "Content-Type": "application/json" },
+            }
+        );
+
+        console.log("✅ Access token updated successfully in AppSync!", mutationResponse.data);
+        return newAccessToken;
+    } catch (error) {
+        console.error("❌ Failed to update access token in AppSync:", error.response?.data || error.message);
+        return null;
+    }
+}
+
+
+// ✅ Function to Refresh Spotify Access Token
+// ✅ Function to Refresh Spotify Access Token
+async function refreshSpotifyToken(userId, authToken) {
+    console.log(`🔄 Refreshing Spotify token for user: ${userId}`);
+
+    const refreshToken = await getRefreshToken(userId, authToken);
+    if (!refreshToken) return null;
+
+    try {
         const refreshResponse = await axios.post(
             TOKEN_REFRESH_URL,
             new URLSearchParams({
@@ -121,50 +289,30 @@ async function fetchTopArtists(userId, authToken) {
         );
 
         if (refreshResponse.status !== 200) {
-            console.error("❌ Failed to refresh token", refreshResponse.data);
-            return errorResponse(401, "Failed to refresh token");
+            console.error("❌ Token refresh failed:", refreshResponse.data);
+            return null;
         }
 
-        accessToken = refreshResponse.data.access_token;
-        expiresAt = new Date(Date.now() + refreshResponse.data.expires_in * 1000).toISOString();
+        const newAccessToken = refreshResponse.data.access_token;
+        const newExpiresAt = new Date(Date.now() + refreshResponse.data.expires_in * 1000).toISOString();
 
-        console.log("✅ Token refreshed successfully");
+        console.log("✅ New Access Token successfully refreshed!");
 
-        // 🔄 Update token in AppSync
-        const mutation = `
-        mutation UpdateSpotifyUserToken($input: UpdateSpotifyUserTokenInput!) {
-            updateSpotifyUserToken(input: $input) {
-                userId
-                accessToken
-                expiresAt
-            }
-        }`;
+        const updatedToken = await updateAccessToken(userId, newAccessToken, newExpiresAt, authToken);
 
-        await axios.post(
-            GRAPHQL_ENDPOINT,
-            {
-                query: mutation,
-                variables: { input: { userId, accessToken, expiresAt } },
-            },
-            {
-                headers: {
-                    Authorization: authToken,
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+        if (!updatedToken) {
+            console.error("❌ Token update failed. This may cause repeated refreshes.");
+        } else {
+            console.log("🔄 Token should now be persisted correctly.");
+        }
+
+        return updatedToken;
+    } catch (error) {
+        console.error("❌ Failed to refresh token:", error.response?.data || error.message);
+        return null;
     }
-
-    console.log("📡 Fetching top artists from Spotify...");
-    const response = await axios.get(SPOTIFY_API_URL, { headers: { Authorization: `Bearer ${accessToken}` } });
-
-    return successResponse(
-        response.data.items.map((artist) => ({
-            name: artist.name,
-            image: artist.images[0]?.url || "",
-        }))
-    );
 }
+
 
 
 // ✅ Function to Exchange Spotify Code for Access Token
@@ -233,7 +381,11 @@ async function exchangeSpotifyCode(userId, code, authToken) {
 function successResponse(data) {
     return {
         statusCode: 200,
-        headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization" },
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        },
         body: JSON.stringify(data),
     };
 }
@@ -242,7 +394,11 @@ function successResponse(data) {
 function errorResponse(statusCode, message) {
     return {
         statusCode,
-        headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization" },
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        },
         body: JSON.stringify({ error: message }),
     };
 }
