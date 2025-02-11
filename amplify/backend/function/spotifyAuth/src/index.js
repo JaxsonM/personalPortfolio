@@ -82,7 +82,7 @@ exports.handler = async (event) => {
         console.log("🚀 Sending Mutation to AppSync...");
 
         // ✅ GraphQL Mutation for AppSync
-        const mutation = `
+        const mutation =` 
         mutation CreateSpotifyUserToken($input: CreateSpotifyUserTokenInput!) {
             createSpotifyUserToken(input: $input) {
                 id

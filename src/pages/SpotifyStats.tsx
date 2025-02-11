@@ -6,8 +6,8 @@ import "@aws-amplify/ui-react/styles.css";
 import { spotifyUserTokensByUserId } from "../graphql/queries"; 
 
 const API_URL = "https://api.spotify.com/v1/me/top/artists?limit=10";
-//const REDIRECT_URI = encodeURIComponent("http://localhost:3000/callback");
-const REDIRECT_URI = encodeURIComponent("http://jaxsoncodes/callback");
+const REDIRECT_URI = encodeURIComponent("http://localhost:3000/callback");
+//const REDIRECT_URI = encodeURIComponent("http://jaxsoncodes/callback");
 const CLIENT_ID = "00ed30d4fa214614be034225cd52f0fb";
 
 // ✅ Create GraphQL Client
