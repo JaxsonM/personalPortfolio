@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { getCurrentUser, fetchAuthSession } from "@aws-amplify/auth";
+import { generateClient } from "aws-amplify/api";
 import { Authenticator, Button } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
+import { spotifyUserTokensByUserId } from "../graphql/queries";
 
 const API_GATEWAY_URL = "https://t1ihagcn2k.execute-api.us-east-1.amazonaws.com/dev/auth";
+//const REDIRECT_URI = encodeURIComponent("http://localhost:3000/callback");
+const REDIRECT_URI = encodeURIComponent("http://jaxsoncodes.com/callback");
 
-const API_URL = "https://api.spotify.com/v1/me/top/artists?limit=10";
-const REDIRECT_URI = encodeURIComponent("http://localhost:3000/callback");
-//const REDIRECT_URI = encodeURIComponent("http://jaxsoncodes/callback");
 const CLIENT_ID = "00ed30d4fa214614be034225cd52f0fb";
+
+// ✅ Initialize AppSync GraphQL Client
+const client = generateClient();
 
 const SpotifyStats: React.FC = () => {
   const [topArtists, setTopArtists] = useState<{ name: string; image: string }[]>([]);
@@ -27,15 +31,22 @@ const SpotifyStats: React.FC = () => {
         }
 
         console.log("✅ User found:", authUser.username);
-        console.log("🔄 Fetching top artists from backend...");
+        console.log("🔄 Checking if user exists in Spotify table...");
 
         const authToken = await getAuthToken();
         if (!authToken) {
           console.error("❌ Failed to retrieve authentication token.");
           return;
         }
-        
 
+        const userExists = await checkUserExistsInSpotifyTable(authUser.username, authToken);
+        if (!userExists) {
+          console.warn("🚨 User does not exist in Spotify table or is missing a refresh token. Redirecting...");
+          redirectToSpotifyAuth();
+          return;
+        }
+
+        console.log("🔄 Fetching top artists from backend...");
         await fetchTopArtists(authUser.username, authToken);
       } catch (error) {
         console.error("❌ Error fetching user or top artists:", error);
@@ -58,21 +69,45 @@ const SpotifyStats: React.FC = () => {
       return null;
     }
   };
+
   const redirectToSpotifyAuth = () => {
     window.location.href = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=user-top-read&response_type=code&show_dialog=true`;
   };
 
+  // ✅ Query AppSync GraphQL API to check if user exists
+  const checkUserExistsInSpotifyTable = async (userId: string, authToken: string): Promise<boolean> => {
+    console.log("🔍 Checking if user exists in Spotify table via GraphQL...");
+
+    try {
+      const response = await client.graphql({
+        query: spotifyUserTokensByUserId,
+        variables: { userId, limit: 1 },
+      });
+
+      const items = response.data?.spotifyUserTokensByUserId?.items || [];
+
+      if (items.length === 0) {
+        console.warn("❌ User not found in Spotify table.");
+        return false;
+      }
+
+      console.log("✅ User exists and has a refresh token.");
+      return true;
+    } catch (error) {
+      console.error("❌ Error checking user via GraphQL:", error);
+      return false;
+    }
+  };
 
   const fetchTopArtists = async (userId: string, authToken: string): Promise<void> => {
     console.log("📡 Fetching top artists from Lambda function...");
-    //redirectToSpotifyAuth();
 
     try {
       const response = await fetch(API_GATEWAY_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: authToken, // Pass Cognito auth token
+          Authorization: authToken,
         },
         body: JSON.stringify({
           action: "getTopArtists",

@@ -5,7 +5,7 @@ const GRAPHQL_ENDPOINT = process.env.APPSYNC_GRAPHQL_ENDPOINT;
 const TOKEN_REFRESH_URL = "https://accounts.spotify.com/api/token";
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
-const SPOTIFY_API_URL = "https://api.spotify.com/v1/me/top/artists?limit=10";
+const SPOTIFY_API_URL = "https://api.spotify.com/v1/me/top/artists?limit=40";
 
 exports.handler = async (event) => {
     console.log("🚀 Lambda Invoked - Event Received:");
