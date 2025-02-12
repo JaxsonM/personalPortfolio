@@ -1,132 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { getCurrentUser, fetchAuthSession } from "@aws-amplify/auth";
-import { generateClient } from "aws-amplify/api";
+import React from "react";
 import { Authenticator, Button } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-import { spotifyUserTokensByUserId } from "../graphql/queries";
-
-const API_GATEWAY_URL = "https://t1ihagcn2k.execute-api.us-east-1.amazonaws.com/dev/auth";
-//const REDIRECT_URI = encodeURIComponent("http://localhost:3000/callback");
-const REDIRECT_URI = encodeURIComponent("http://jaxsoncodes.com/callback");
-
-const CLIENT_ID = "00ed30d4fa214614be034225cd52f0fb";
-
-// ✅ Initialize AppSync GraphQL Client
-const client = generateClient();
+import { useSpotify } from "../hooks/useSpotify";
 
 const SpotifyStats: React.FC = () => {
-  const [topArtists, setTopArtists] = useState<{ name: string; image: string }[]>([]);
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchUserAndArtists = async () => {
-      try {
-        console.log("🔄 Fetching authenticated user...");
-        const authUser = await getCurrentUser();
-        setUser(authUser);
-
-        if (!authUser) {
-          console.warn("⚠️ No authenticated user found!");
-          return;
-        }
-
-        console.log("✅ User found:", authUser.username);
-        console.log("🔄 Checking if user exists in Spotify table...");
-
-        const authToken = await getAuthToken();
-        if (!authToken) {
-          console.error("❌ Failed to retrieve authentication token.");
-          return;
-        }
-
-        const userExists = await checkUserExistsInSpotifyTable(authUser.username, authToken);
-        if (!userExists) {
-          console.warn("🚨 User does not exist in Spotify table or is missing a refresh token. Redirecting...");
-          redirectToSpotifyAuth();
-          return;
-        }
-
-        console.log("🔄 Fetching top artists from backend...");
-        await fetchTopArtists(authUser.username, authToken);
-      } catch (error) {
-        console.error("❌ Error fetching user or top artists:", error);
-      }
-    };
-
-    fetchUserAndArtists();
-  }, []);
-
-  const getAuthToken = async (): Promise<string | null> => {
-    try {
-      const session = await fetchAuthSession();
-      if (!session.tokens || !session.tokens.idToken) {
-        console.error("No ID token found in session");
-        return null;
-      }
-      return session.tokens.idToken.toString(); // Convert JWT to string
-    } catch (error) {
-      console.error("Error fetching auth token:", error);
-      return null;
-    }
-  };
-
-  const redirectToSpotifyAuth = () => {
-    window.location.href = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=user-top-read&response_type=code&show_dialog=true`;
-  };
-
-  // ✅ Query AppSync GraphQL API to check if user exists
-  const checkUserExistsInSpotifyTable = async (userId: string, authToken: string): Promise<boolean> => {
-    console.log("🔍 Checking if user exists in Spotify table via GraphQL...");
-
-    try {
-      const response = await client.graphql({
-        query: spotifyUserTokensByUserId,
-        variables: { userId, limit: 1 },
-      });
-
-      const items = response.data?.spotifyUserTokensByUserId?.items || [];
-
-      if (items.length === 0) {
-        console.warn("❌ User not found in Spotify table.");
-        return false;
-      }
-
-      console.log("✅ User exists and has a refresh token.");
-      return true;
-    } catch (error) {
-      console.error("❌ Error checking user via GraphQL:", error);
-      return false;
-    }
-  };
-
-  const fetchTopArtists = async (userId: string, authToken: string): Promise<void> => {
-    console.log("📡 Fetching top artists from Lambda function...");
-
-    try {
-      const response = await fetch(API_GATEWAY_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: authToken,
-        },
-        body: JSON.stringify({
-          action: "getTopArtists",
-          userId,
-        }),
-      });
-
-      if (!response.ok) {
-        console.error("❌ Error fetching top artists. Status:", response.status);
-        return;
-      }
-
-      const data = await response.json();
-      setTopArtists(data);
-      console.log("✅ Successfully fetched top artists!");
-    } catch (err) {
-      console.error("❌ Error fetching top artists from backend:", err);
-    }
-  };
+  const { user, topArtists, loading, error } = useSpotify();
 
   return (
     <Authenticator>
@@ -145,21 +23,29 @@ const SpotifyStats: React.FC = () => {
             </Button>
           </div>
 
+          {/* Error Handling */}
+          {error && <p className="text-red-400 text-center">{error}</p>}
+
           {/* Top Artists Section */}
           <section className="w-full max-w-4xl bg-gray-800 p-6 rounded-lg shadow-lg mb-6">
             <h2 className="text-2xl font-semibold mb-4">Top Artists</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {topArtists.length > 0 ? (
-                topArtists.map((artist, index) => (
-                  <div key={index} className="flex flex-col items-center bg-gray-700 p-4 rounded-lg">
-                    <img src={artist.image} alt={artist.name} className="w-24 h-24 rounded-full mb-2" />
-                    <p className="text-center text-gray-300">{artist.name}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-center text-gray-400">Login to see your top artists.</p>
-              )}
-            </div>
+
+            {loading ? (
+              <p className="text-center text-gray-400">Loading...</p>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {topArtists.length > 0 ? (
+                  topArtists.map((artist, index) => (
+                    <div key={index} className="flex flex-col items-center bg-gray-700 p-4 rounded-lg">
+                      <img src={artist.image} alt={artist.name} className="w-24 h-24 rounded-full mb-2" />
+                      <p className="text-center text-gray-300">{artist.name}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-gray-400">Login to see your top artists.</p>
+                )}
+              </div>
+            )}
           </section>
         </div>
       )}
