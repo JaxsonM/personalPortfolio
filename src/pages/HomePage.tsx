@@ -32,38 +32,24 @@ const HomePage: React.FC = () => {
         <div className="container mx-auto px-6">
           <h2 className="text-2xl font-bold mb-8">Projects</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Project 1 */}
-            <div className="bg-white shadow-md rounded-md overflow-hidden">
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Randomizer App</h3>
-                <p className="text-gray-700 mb-4">
-                  A fun app to randomize participants for events or raffles. Built using React, TypeScript, and TailwindCSS.
-                </p>
-                <Link
-                  to="/randomizer"
-                  className="text-blue-500 hover:underline"
-                >
-                  Check it out
-                </Link>
-              </div>
-            </div>
 
-            {/* Project 2 */}
+            
+            {/* Project 6 */}
             <div className="bg-white shadow-md rounded-md overflow-hidden">
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Elk Hunting Chatbot</h3>
+                <h3 className="text-xl font-semibold mb-2">Spotify Stats App</h3>
                 <p className="text-gray-700 mb-4">
-                  An AI-powered chatbot to help hunters get tips and insights on Elk hunting. Integrated with OpenAI's GPT model.
+                  An app to explore and visualize your top Spotify artists, songs, and playlists. Integrated with the Spotify API for personalized stats.
                 </p>
                 <Link
-                  to="/huntingpage"
+                  to="/spotifystats"
                   className="text-green-500 hover:underline"
                 >
-                  Explore the chatbot
+                  Explore SpotifyStats
                 </Link>
               </div>
             </div>
-
+            
             {/* Project 3 */}
             <div className="bg-white shadow-md rounded-md overflow-hidden">
               <div className="p-6">
@@ -111,19 +97,15 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Project 6 */}
+            
+            {/* Project 2 */}
             <div className="bg-white shadow-md rounded-md overflow-hidden">
               <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Spotify Stats App</h3>
+                <h3 className="text-xl font-semibold mb-2">Elk Hunting Chatbot</h3>
                 <p className="text-gray-700 mb-4">
-                  An app to explore and visualize your top Spotify artists, songs, and playlists. Integrated with the Spotify API for personalized stats.
+                  An AI-powered chatbot to help hunters get tips and insights on Elk hunting. Integrated with OpenAI's GPT model.
                 </p>
-                <Link
-                  to="/spotifystats"
-                  className="text-green-500 hover:underline"
-                >
-                  Explore SpotifyStats
-                </Link>
+                <span className="text-gray-500 italic">Coming soon...</span>
               </div>
             </div>
           </div>
@@ -145,7 +127,7 @@ const HomePage: React.FC = () => {
               Email Me
             </a>
             <a
-              href="https://www.linkedin.com/in/jaxsonmadison"
+              href="https://www.linkedin.com/in/jaxson-madison"
               className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800"
             >
               LinkedIn
