@@ -331,6 +331,7 @@ async function exchangeSpotifyCode(userId, code, authToken) {
         }).toString(),
         { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
     );
+    console.log("Response from code exchange:", tokenResponse);
 
     if (tokenResponse.status !== 200) {
         return errorResponse(500, "Failed to retrieve tokens from Spotify");

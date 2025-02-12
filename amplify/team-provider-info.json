@@ -18,7 +18,7 @@
           "spotifyClientSecret": "b66a9b46099e4a0cb2cae5411a828896",
           "spotifyRedirectUri": "http://localhost:3000/callback",
           "deploymentBucketName": "amplify-myapp-dev-a0eae-deployment",
-          "s3Key": "amplify-builds/spotifyAuth-6f6c3738696c754a6d30-build.zip"
+          "s3Key": "amplify-builds/spotifyAuth-726c65347079375a5334-build.zip"
         }
       },
       "api": {
