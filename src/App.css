@@ -37,14 +37,3 @@
   }
 }
 
-/* e.g. in your global CSS or tailwind globals file */
-[data-amplify-authenticator] {
-  /* primary button background */
-  --amplify-components-button-primary-background-color: #ff4500;
-  /* primary button hover */
-  --amplify-components-button-primary-hover-background-color: #e03e00;
-  /* form background */
-  --amplify-components-authenticator-form-background-color: #1e293b;
-  /* form padding */
-  --amplify-components-authenticator-form-padding: 2rem;
-}
