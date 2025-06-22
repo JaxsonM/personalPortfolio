@@ -19,11 +19,22 @@
           "spotifyRedirectUri": "http://localhost:3000/callback",
           "deploymentBucketName": "amplify-myapp-dev-a0eae-deployment",
           "s3Key": "amplify-builds/spotifyAuth-726c65347079375a5334-build.zip"
+        },
+        "tmdbSearch": {
+          "tmdbApiKey": "b9027795c03fecc4295b4f6de1b33258",
+          "deploymentBucketName": "amplify-myapp-dev-a0eae-deployment",
+          "s3Key": "amplify-builds/tmdbSearch-5a4b30494f7a784d6a6e-build.zip"
+        },
+        "helloWorld": {
+          "deploymentBucketName": "amplify-myapp-dev-a0eae-deployment",
+          "s3Key": "amplify-builds/helloWorld-46374a6b423936513366-build.zip"
         }
       },
       "api": {
         "spotifyApi": {},
-        "spotifyTokens": {}
+        "spotifyTokens": {},
+        "tmdbApi": {},
+        "helloApi": {}
       },
       "auth": {
         "myapp38de81b0": {}

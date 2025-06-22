@@ -8,6 +8,16 @@ const awsmobile = {
             "name": "spotifyApi",
             "endpoint": "https://t1ihagcn2k.execute-api.us-east-1.amazonaws.com/dev",
             "region": "us-east-1"
+        },
+        {
+            "name": "tmdbApi",
+            "endpoint": "https://tzxq4mhwpi.execute-api.us-east-1.amazonaws.com/dev",
+            "region": "us-east-1"
+        },
+        {
+            "name": "helloApi",
+            "endpoint": "https://c3kdftan1m.execute-api.us-east-1.amazonaws.com/dev",
+            "region": "us-east-1"
         }
     ],
     "aws_appsync_graphqlEndpoint": "https://lkm4p7oadbgwrmhmrhisnxnpee.appsync-api.us-east-1.amazonaws.com/graphql",

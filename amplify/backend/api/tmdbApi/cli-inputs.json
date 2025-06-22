@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "paths": {
+    "/tmdbsearch": {
+      "name": "/tmdbsearch",
+      "lambdaFunction": "tmdbSearch",
+      "permissions": {
+        "setting": "open"
+      }
+    }
+  }
+}
