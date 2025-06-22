@@ -16,3 +16,20 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* e.g. in your global CSS or tailwind globals file */
+[data-amplify-authenticator] {
+  /* primary button background */
+  /*--amplify-components-button-primary-background-color: #ff4500;
+  /* primary button hover */
+  /*--amplify-components-button-primary-hover-background-color: #e03e00;
+  /* form background */
+  /*--amplify-components-authenticator-form-background-color: #6ede80; */
+  /* change the white form container to your dark gray */
+  --amplify-components-authenticator-router-background-color: #20242a;
+  /* also apply to any “inactive” state panels */
+  /* --amplify-components-authenticator-state-inactive-background-color: #1e293b; */
+  /* if you want to change any other “primary” white areas */
+  /* --amplify-colors-background-primary: #1e293b;
+  --amplify-components-authenticator-form-padding: 2rem; */
+}

@@ -66,7 +66,7 @@ const SpotifyStats: React.FC = () => {
       {/* Sign-In Modal */}
       {showSignIn && (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-70 z-50">
-          <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-96">
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
             <Authenticator />
             <button
               onClick={() => setShowSignIn(false)}
