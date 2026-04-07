@@ -55,6 +55,19 @@ const HomePage: React.FC = () => {
               </div>
             </div>
 
+            {/* Citrix Fixit App */}
+            <div className="bg-white shadow-md rounded-md overflow-hidden hover:shadow-xl transform hover:-translate-y-1 transition">
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-2">Citrix Fixit App</h3>
+                <p className="text-gray-700 mb-4">
+                  Troubleshoot Citrix with this handy Fixit script
+                </p>
+                <Link to="/fixcitrix" className="inline-block text-green-500 hover:underline">
+                  Explore Citrix Fixit →
+                </Link>
+              </div>
+            </div>
+
             {/* Hygieia Auto Detailing Website */}
             {/* <div className="bg-white shadow-md rounded-md overflow-hidden hover:shadow-xl transform hover:-translate-y-1 transition">
               <div className="p-6">

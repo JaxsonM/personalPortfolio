@@ -8,6 +8,7 @@ import CallbackPage from './pages/CallbackPage';
 import SpotifyStatsDemo from './pages/SpotifyStatsDemo';
 import MovieAppPage from './pages/MovieApp/MovieAppPage';
 import HelloPage from './pages/ApiPractice';
+import CitrixScriptPage from './pages/CitrixScriptPage';
 
 const AppRouter: React.FC = () => {
   return (
@@ -21,6 +22,7 @@ const AppRouter: React.FC = () => {
         <Route path="/spotifystatsdemo" element={<SpotifyStatsDemo />} />
         <Route path="/movieapp" element={<MovieAppPage />} />
         <Route path="/hello" element={<HelloPage />} />
+        <Route path="/fixcitrix" element={<CitrixScriptPage />} />
       </Routes>
     </Router>
   );
