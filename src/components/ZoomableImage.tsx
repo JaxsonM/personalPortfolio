@@ -27,12 +27,13 @@ const ZoomableImage: React.FC<{ src?: string; alt?: string }> = ({ src, alt = ''
         aria-label={`Enlarge image: ${alt}`}
         className="group block w-full my-8 cursor-zoom-in"
       >
-        {/* On desktop, cap the height so the whole image fits on screen at once. */}
+        {/* Cap the height so the whole image fits on screen at once; the width follows the image's shape.
+            SVGs need width/height attributes on their root element for this to work. */}
         <img
           src={src}
           alt={alt}
           loading="lazy"
-          className="block mx-auto w-full h-auto md:w-auto md:max-h-[50px] bg-white border border-gray-200 rounded-xl group-hover:border-gray-300 transition-colors"
+          className="block mx-auto w-auto h-auto max-w-full max-h-[min(600px,70vh)] bg-white border border-gray-200 rounded-xl group-hover:border-gray-300 transition-colors"
         />
         <span className="block mt-2 text-center text-sm text-gray-400 group-hover:text-gray-600">
           Click to enlarge
