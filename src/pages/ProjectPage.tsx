@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ReactMarkdown, { Components } from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import PageShell from '../components/PageShell';
+import ZoomableImage from '../components/ZoomableImage';
 import { getStatusStyle } from '../components/statusStyles';
 import { getProject } from '../content/projects';
 import NotFoundPage from './NotFoundPage';
@@ -10,7 +12,12 @@ import NotFoundPage from './NotFoundPage';
 const markdownComponents: Components = {
   h2: ({ children }) => <h2 className="text-2xl font-bold mt-12 mb-4">{children}</h2>,
   h3: ({ children }) => <h3 className="text-lg font-semibold mt-8 mb-3">{children}</h3>,
-  p: ({ children }) => <p className="text-gray-600 leading-relaxed mb-4">{children}</p>,
+  // Markdown wraps a standalone image in a paragraph; skip the <p> so the image's pop-up isn't nested inside one.
+  p: ({ node, children }) => {
+    const only = node?.children.length === 1 ? node.children[0] : undefined;
+    if (only && only.type === 'element' && only.tagName === 'img') return <>{children}</>;
+    return <p className="text-gray-600 leading-relaxed mb-4">{children}</p>;
+  },
   ul: ({ children }) => <ul className="list-disc pl-6 space-y-2 text-gray-600 mb-4">{children}</ul>,
   ol: ({ children }) => <ol className="list-decimal pl-6 space-y-2 text-gray-600 mb-4">{children}</ol>,
   li: ({ children }) => <li className="leading-relaxed">{children}</li>,
@@ -28,6 +35,20 @@ const markdownComponents: Components = {
     ) : (
       <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{children}</a>
     ),
+  // Images fit on screen and open larger in a pop-up.
+  img: ({ src, alt }) => <ZoomableImage src={src} alt={alt} />,
+  // Tables (enabled by remark-gfm). The wrapper scrolls sideways only if a table can't fit on a small screen.
+  table: ({ children }) => (
+    <div className="overflow-x-auto mb-6 border border-gray-200 rounded-xl">
+      <table className="w-full text-sm text-left [&_td:first-child]:font-semibold [&_td:first-child]:text-gray-900 [&_td:first-child]:whitespace-nowrap">
+        {children}
+      </table>
+    </div>
+  ),
+  thead: ({ children }) => <thead className="bg-gray-50 border-b border-gray-200">{children}</thead>,
+  tbody: ({ children }) => <tbody className="divide-y divide-gray-200">{children}</tbody>,
+  th: ({ children }) => <th className="px-4 py-3 font-semibold text-gray-900">{children}</th>,
+  td: ({ children }) => <td className="px-4 py-3 text-gray-600 align-top leading-relaxed">{children}</td>,
 };
 
 const ProjectPage: React.FC = () => {
@@ -91,7 +112,7 @@ const ProjectPage: React.FC = () => {
           </div>
         )}
         {!failed && markdown === null && <p className="text-gray-400 mt-12">Loading…</p>}
-        {markdown !== null && <ReactMarkdown components={markdownComponents}>{markdown}</ReactMarkdown>}
+        {markdown !== null && <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{markdown}</ReactMarkdown>}
       </article>
     </PageShell>
   );
