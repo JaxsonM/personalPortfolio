@@ -16,10 +16,6 @@ A dedicated Minecraft Bedrock server for about six friends who play on consoles 
 
 ## How it's built
 
-### Choosing Bedrock over Java
-
-My friend group is split between console and PC. Consoles can only run Bedrock Edition, and Java and Bedrock can't connect to each other directly. The common workaround is a Java server with a plugin called Geyser that translates Bedrock traffic into Java traffic. My PC friends didn't mind switching to Bedrock, so I ran a pure Bedrock server instead. That meant one less piece of software to maintain and no risk of the translation layer lagging behind a game update.
-
 ### The container and service
 
 The server runs in an unprivileged LXC container. "Unprivileged" means the root user inside the container maps to an ordinary, powerless user on the host, which limits the damage if the container were ever compromised.
@@ -42,10 +38,6 @@ My home IP address can change at any time, which would break that record. So I w
 - It checks the current public IP, compares it to the DNS record, and only updates the record when they differ.
 - It talks to the Cloudflare API with a token that can only edit DNS for this one domain. If the token ever leaked, the damage would be limited to a single domain's DNS.
 - The token lives in a separate file only root can read, not in the script itself.
-
-### Console players
-
-Xbox and Switch don't let you add custom servers, only Mojang's featured ones. Console players use BedrockConnect, a DNS-based workaround. They change their console's DNS settings to point at a BedrockConnect server. When they select one of the featured servers, that DNS server answers the lookup with BedrockConnect's own address instead of the featured one, which opens a screen where they can enter my server's address and connect directly.
 
 ## What broke and how I fixed it
 
@@ -78,11 +70,21 @@ My first theory was a router limitation. It fit the symptoms, but it was built o
 
 "The process is running" and "the service works" are different things, and systemd can only tell you the first. So I wrote a health check that runs every 5 minutes on a systemd timer: if the service should be running but its port isn't listening, it restarts the server. The bigger lesson was to check the basics before building theories on top of them.
 
-### The wrong device in my router
+### Pointing the port forward at the right device
 
-When I set up the port forward, the router's device list showed an "ASUS Windows" device that I almost picked. It was actually my Proxmox host. The router named it after the manufacturer of its network card, and the host's network card is ASUS.
+Setting up the port forward turned into a lesson in how routers identify devices.
 
-The first half of a MAC address identifies the manufacturer. Proxmox gives containers virtual network cards whose MAC addresses start with a prefix Proxmox owns, so the container could never show up as an ASUS device. Forwarding to the host wouldn't have been dangerous, since nothing on it listens on those ports, but it would have silently failed and been confusing to troubleshoot later.
+**The container was invisible.** It had a static IP, and my router's app didn't list it. Routers learn device names from DHCP requests, and a device with a static IP never makes one. I sent some traffic from the container to get the router's attention, and a device called "ASUS Windows" appeared. I almost picked it.
+
+**It was actually my Proxmox host.** The router names devices using the manufacturer of their network card, which it reads from the first half of the MAC address. My host is an old ASUS gaming PC, so its network card is ASUS. Containers get virtual network cards from Proxmox, with MAC addresses that start with a prefix Proxmox owns, so the container could never show up as an ASUS device. Forwarding to the host wouldn't have been dangerous, since nothing on it listens on the game's ports, but it would have silently failed.
+
+**I switched the container to DHCP.** After a reboot, it asked the router for an address, got a new one, and showed up in the app by name. I created the port forward.
+
+**Then the addresses didn't match.** The router automatically reserved an address for the container, but it reserved the *old* static address, because that was the MAC-to-address pairing it remembered from earlier. The port forward and reservation pointed at one address while the container sat on another, so outside traffic would have gone to an address nobody was using.
+
+**One more reboot fixed it.** A DHCP lease lasts until it's time to renew, so the container had no reason to ask for a new address on its own. Rebooting made it ask right away, the router answered with the reserved address, and the container, the reservation, and the port forward finally all agreed.
+
+The lesson: a router doesn't really know devices by name or IP address. It knows them by MAC address, and everything else is attached to that. When a port forward doesn't work, checking that the container, the reservation, and the forward all point at the same address is one of the first things I look at now.
 
 ## Security decisions
 
