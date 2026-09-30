@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import SiteFooter from '../components/SiteFooter';
+import { getStatusStyle } from '../components/statusStyles';
+import { projects } from '../content/projects';
 
-const statusStyles: Record<string, { badge: string; number: string }> = {
-  Complete: { badge: 'bg-green-50 text-green-600', number: 'text-green-500' },
-  'In Progress': { badge: 'bg-blue-50 text-blue-600', number: 'text-blue-500' },
-  'Up Next': { badge: 'bg-amber-50 text-amber-600', number: 'text-amber-500' },
-  Planned: { badge: 'bg-gray-100 text-gray-400', number: 'text-gray-300' },
-};
+const featuredProject = projects.find((p) => p.featured);
+const otherProjects = projects.filter((p) => !p.featured);
 
 const HomePage: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -145,7 +145,7 @@ const HomePage: React.FC = () => {
               Since March 2026 I've been a Windows Server Administrator at Conduent, working in a 24x7 Global Command Center. I monitor and remediate servers, work with VMware and Active Directory, and join Major Incident bridges. Before that I was at Morgan Stanley, first on the service desk and then as an Advisory Pod technician supporting about 3,000 VIP and executive users.
             </p>
             <p>
-              I hold a BS in Computer Science from Utah State University and the AWS Certified Cloud Practitioner certification, and I'm working toward Microsoft Certified: Azure Administrator Associate (AZ-104).
+              I hold a BS in Computer Science from Utah State University and the AWS Certified Cloud Practitioner certification, and I'm working toward Microsoft Certified: Windows Server Administrator Associate (AZ-802).
             </p>
           </div>
         </div>
@@ -158,18 +158,18 @@ const HomePage: React.FC = () => {
           <h2 className="text-3xl font-bold mb-12">What I've built</h2>
 
           {/* Featured project card */}
-          <div className="border border-gray-200 rounded-2xl p-8 hover:border-gray-300 hover:shadow-lg transition-all duration-200 flex flex-col md:flex-row gap-8">
+          {featuredProject && (
+          <Link to={`/projects/${featuredProject.slug}`} className="group border border-gray-200 rounded-2xl p-8 hover:border-gray-300 hover:shadow-lg transition-all duration-200 flex flex-col md:flex-row gap-8">
             <div className="flex-1">
               <span className="inline-block text-xs font-medium text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full mb-4">Featured Project</span>
-              <h3 className="text-2xl font-semibold mb-3">Proxmox Home Lab and Secure Remote Access</h3>
-              <p className="text-gray-500 leading-relaxed mb-6">
-                A repurposed gaming PC running Proxmox VE 9 that hosts my lab and self-hosted services. Two network bridges keep the Windows lab on its own isolated network, and remote access goes through Cloudflare Tunnel behind Cloudflare Access instead of a VPN or open inbound ports.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {['Proxmox VE', 'LXC', 'LVM-thin', 'Linux bridges', 'iptables NAT', 'Cloudflare Tunnel', 'Cloudflare Access'].map((tag) => (
+              <h3 className="text-2xl font-semibold mb-3">{featuredProject.title}</h3>
+              <p className="text-gray-500 leading-relaxed mb-6">{featuredProject.summary}</p>
+              <div className="flex flex-wrap gap-2 mb-6">
+                {featuredProject.tags.map((tag) => (
                   <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200">{tag}</span>
                 ))}
               </div>
+              <span className="text-sm font-medium text-blue-600 group-hover:text-blue-800">Read the write-up →</span>
             </div>
             {/* Visual panel */}
             <div className="md:w-56 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-100 flex items-center justify-center min-h-40">
@@ -179,6 +179,28 @@ const HomePage: React.FC = () => {
                 <path d="M7 6.5h.01M7 17.5h.01M11 6.5h6M11 17.5h6" />
               </svg>
             </div>
+          </Link>
+          )}
+
+          {/* Other projects */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+            {otherProjects.map((project) => (
+              <Link key={project.slug} to={`/projects/${project.slug}`}
+                className="group flex flex-col border border-gray-200 rounded-2xl p-6 hover:border-gray-300 hover:shadow-lg transition-all duration-200">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <h3 className="font-semibold">{project.title}</h3>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${getStatusStyle(project.status).badge}`}>{project.status}</span>
+                </div>
+                <p className="text-gray-500 text-sm leading-relaxed mb-4 flex-1">{project.summary}</p>
+                <span className="text-sm font-medium text-blue-600 group-hover:text-blue-800">Read the write-up →</span>
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-10 text-center">
+            <Link to="/projects" className="inline-block border border-gray-300 text-gray-700 px-7 py-3 rounded-full text-sm font-medium hover:border-gray-500 transition-colors">
+              View all projects
+            </Link>
           </div>
 
         </div>
@@ -197,17 +219,17 @@ const HomePage: React.FC = () => {
             {[
               { phase: '01', title: 'Proxmox host and secure remote access', desc: 'Proxmox VE 9 on a repurposed gaming PC, with remote access through Cloudflare Tunnel behind Cloudflare Access.', status: 'Complete' },
               { phase: '02', title: 'Self-hosted services', desc: 'A Minecraft Bedrock server, a Lychee photo gallery, and a browser-based dev environment, each in its own LXC container.', status: 'Complete' },
-              { phase: '03', title: 'Windows Server and Active Directory lab', desc: 'Two domain controllers and a member server on an isolated network, built alongside an AZ-800 course.', status: 'In Progress' },
+              { phase: '03', title: 'Windows Server and Active Directory lab', desc: 'Two domain controllers and a member server on an isolated network, built alongside an AZ-802 course.', status: 'In Progress' },
               { phase: '04', title: 'Networking', desc: 'A dedicated OPNsense router/firewall and VLANs.', status: 'Planned' },
               { phase: '05', title: 'Monitoring', desc: 'Host hardware temperatures plus a Raspberry Pi room sensor.', status: 'Planned' },
               { phase: '06', title: 'Infrastructure as Code', desc: 'Managing lab infrastructure with Terraform.', status: 'Planned' },
             ].map(({ phase, title, desc, status }) => (
               <div key={phase} className="flex gap-4 border border-gray-200 bg-white rounded-2xl p-5">
-                <span className={`text-xs font-mono font-bold mt-0.5 ${(statusStyles[status] ?? statusStyles.Planned).number}`}>{phase}</span>
+                <span className={`text-xs font-mono font-bold mt-0.5 ${getStatusStyle(status).number}`}>{phase}</span>
                 <div className="flex-1">
                   <div className="flex items-start justify-between gap-3 mb-1">
                     <h3 className="font-semibold text-sm">{title}</h3>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${(statusStyles[status] ?? statusStyles.Planned).badge}`}>{status}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${getStatusStyle(status).badge}`}>{status}</span>
                   </div>
                   <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
                 </div>
@@ -248,7 +270,7 @@ const HomePage: React.FC = () => {
               },
               {
                 category: 'Currently learning',
-                items: ['Terraform', 'Azure administration (AZ-104)'],
+                items: ['Terraform', 'Windows Server administration (AZ-802)'],
                 learning: true,
               },
             ].map(({ category, items, learning }) => (
@@ -297,7 +319,7 @@ const HomePage: React.FC = () => {
                 </div>
                 <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 font-medium">In Progress</span>
               </div>
-              <h3 className="font-semibold mb-1">Microsoft Certified: Azure Administrator Associate (AZ-104)</h3>
+              <h3 className="font-semibold mb-1">Microsoft Certified: Windows Server Administrator Associate (AZ-802)</h3>
               <p className="text-sm text-gray-500">Microsoft</p>
             </div>
 
@@ -332,12 +354,7 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-gray-50 border-t border-gray-100 py-6">
-        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between text-sm text-gray-400 gap-2">
-          <span>&copy; {new Date().getFullYear()} Jaxson Madison</span>
-          <span>Built with React · Hosted on AWS Amplify</span>
-        </div>
-      </footer>
+      <SiteFooter />
 
     </div>
   );

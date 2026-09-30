@@ -8,6 +8,9 @@ import SpotifyStatsDemo from './pages/SpotifyStatsDemo';
 import MovieAppPage from './pages/MovieApp/MovieAppPage';
 import HelloPage from './pages/ApiPractice';
 import CitrixScriptPage from './pages/CitrixScriptPage';
+import ProjectsPage from './pages/ProjectsPage';
+import ProjectPage from './pages/ProjectPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 const AppRouter: React.FC = () => {
   return (
@@ -21,6 +24,9 @@ const AppRouter: React.FC = () => {
         <Route path="/movieapp" element={<MovieAppPage />} />
         <Route path="/hello" element={<HelloPage />} />
         <Route path="/fixcitrix" element={<CitrixScriptPage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/projects/:slug" element={<ProjectPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
   );
