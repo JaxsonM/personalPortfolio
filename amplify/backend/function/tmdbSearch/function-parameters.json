@@ -1,9 +1,0 @@
-{
-  "lambdaLayers": [],
-  "environmentVariableList": [
-    {
-      "cloudFormationParameterName": "tmdbApiKey",
-      "environmentVariableName": "TMDB_API_KEY"
-    }
-  ]
-}

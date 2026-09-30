@@ -1,19 +1,5 @@
 {
   "api": {
-    "helloApi": {
-      "dependsOn": [
-        {
-          "attributes": [
-            "Name",
-            "Arn"
-          ],
-          "category": "function",
-          "resourceName": "helloWorld"
-        }
-      ],
-      "providerPlugin": "awscloudformation",
-      "service": "API Gateway"
-    },
     "spotifyApi": {
       "dependsOn": [
         {
@@ -51,20 +37,6 @@
       },
       "providerPlugin": "awscloudformation",
       "service": "AppSync"
-    },
-    "tmdbApi": {
-      "dependsOn": [
-        {
-          "attributes": [
-            "Name",
-            "Arn"
-          ],
-          "category": "function",
-          "resourceName": "tmdbSearch"
-        }
-      ],
-      "providerPlugin": "awscloudformation",
-      "service": "API Gateway"
     }
   },
   "auth": {
@@ -94,39 +66,13 @@
     }
   },
   "function": {
-    "helloWorld": {
-      "build": true,
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
     "spotifyAuth": {
-      "build": true,
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
-    "tmdbSearch": {
       "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     }
   },
   "parameters": {
-    "AMPLIFY_function_helloWorld_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "helloWorld"
-        }
-      ]
-    },
-    "AMPLIFY_function_helloWorld_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "helloWorld"
-        }
-      ]
-    },
     "AMPLIFY_function_spotifyAuth_deploymentBucketName": {
       "usedBy": [
         {
@@ -164,30 +110,6 @@
         {
           "category": "function",
           "resourceName": "spotifyAuth"
-        }
-      ]
-    },
-    "AMPLIFY_function_tmdbSearch_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "tmdbSearch"
-        }
-      ]
-    },
-    "AMPLIFY_function_tmdbSearch_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "tmdbSearch"
-        }
-      ]
-    },
-    "AMPLIFY_function_tmdbSearch_tmdbApiKey": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "tmdbSearch"
         }
       ]
     }

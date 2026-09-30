@@ -1,10 +1,5 @@
 export type AmplifyDependentResourcesAttributes = {
   "api": {
-    "helloApi": {
-      "ApiId": "string",
-      "ApiName": "string",
-      "RootUrl": "string"
-    },
     "spotifyApi": {
       "ApiId": "string",
       "ApiName": "string",
@@ -13,11 +8,6 @@ export type AmplifyDependentResourcesAttributes = {
     "spotifyTokens": {
       "GraphQLAPIEndpointOutput": "string",
       "GraphQLAPIIdOutput": "string"
-    },
-    "tmdbApi": {
-      "ApiId": "string",
-      "ApiName": "string",
-      "RootUrl": "string"
     }
   },
   "auth": {
@@ -32,21 +22,7 @@ export type AmplifyDependentResourcesAttributes = {
     }
   },
   "function": {
-    "helloWorld": {
-      "Arn": "string",
-      "LambdaExecutionRole": "string",
-      "LambdaExecutionRoleArn": "string",
-      "Name": "string",
-      "Region": "string"
-    },
     "spotifyAuth": {
-      "Arn": "string",
-      "LambdaExecutionRole": "string",
-      "LambdaExecutionRoleArn": "string",
-      "Name": "string",
-      "Region": "string"
-    },
-    "tmdbSearch": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
       "LambdaExecutionRoleArn": "string",
