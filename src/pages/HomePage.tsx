@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -32,7 +31,7 @@ const HomePage: React.FC = () => {
                 {s === 'building' ? "What I'm Building" : s}
               </button>
             ))}
-            <a href="https://github.com/jaxsonmadison" target="_blank" rel="noopener noreferrer"
+            <a href="https://github.com/JaxsonM" target="_blank" rel="noopener noreferrer"
               className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm transition-colors ${scrolled ? 'bg-gray-900 text-white hover:bg-gray-700' : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'}`}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
@@ -55,7 +54,7 @@ const HomePage: React.FC = () => {
                 {s === 'building' ? "What I'm Building" : s}
               </button>
             ))}
-            <a href="https://github.com/jaxsonmadison" target="_blank" rel="noopener noreferrer" className="text-left hover:text-gray-900">
+            <a href="https://github.com/JaxsonM" target="_blank" rel="noopener noreferrer" className="text-left hover:text-gray-900">
               GitHub
             </a>
           </div>
@@ -81,12 +80,14 @@ const HomePage: React.FC = () => {
           </div>
           {/* Hero text */}
           <div className="flex-1 text-center md:text-left">
-            <p className="text-sm font-medium text-blue-400 uppercase tracking-widest mb-3">Cloud & DevOps Engineer</p>
+            <p className="text-sm font-medium text-blue-400 tracking-wide leading-relaxed mb-4 max-w-xl">
+              Systems Administrator | Windows Server, VMware & Azure | Scripting & Infrastructure Automation | AWS Certified
+            </p>
             <h1 className="text-5xl md:text-6xl font-bold text-white leading-tight mb-4">
               Jaxson<br />Madison
             </h1>
             <p className="text-lg text-gray-400 max-w-xl leading-relaxed mb-8">
-              Building infrastructure that scales. I work across Windows Server administration, VMware virtualization, and cloud automation — with a home lab to match.
+              I keep Windows and VMware infrastructure healthy in a 24x7 enterprise environment, and I'm building toward Azure and infrastructure automation through a hands-on home lab.
             </p>
             <div className="flex flex-wrap gap-3 justify-center md:justify-start">
               <button onClick={() => scrollTo('projects')}
@@ -118,8 +119,8 @@ const HomePage: React.FC = () => {
           {/* Stats row */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10 pb-10 border-b border-gray-200">
             {[
-              { value: '2+', label: 'Years in enterprise IT' },
-              { value: '2', label: 'AWS certifications' },
+              { value: '2+', label: 'Years in IT' },
+              { value: '1', label: 'Cloud certification' },
               { value: '24x7', label: 'Global ops experience' },
               { value: '6', label: 'Home lab phases' },
             ].map(({ value, label }) => (
@@ -131,13 +132,13 @@ const HomePage: React.FC = () => {
           </div>
           <div className="space-y-4 text-gray-600 leading-relaxed">
             <p>
-              Cloud and DevOps enthusiast with a background in IT support, software development, and AWS. I thrive on solving infrastructure challenges, automating workflows, and helping teams move faster and more reliably.
+              I'm a systems administrator with a background in IT support, building toward cloud infrastructure. Outside of work I run a Proxmox home lab where I practice the skills I want to grow: Active Directory, networking, self-hosted services, and automation.
             </p>
             <p>
-              Currently at Conduent as a Windows Server Administrator, working in a 24x7 Global Command Center focused on monitoring, alerting, and VMware virtualization. Previously at Morgan Stanley supporting enterprise technical operations for global teams.
+              Since March 2026 I've been a Windows Server Administrator at Conduent, working in a 24x7 Global Command Center. I monitor and remediate servers, work with VMware and Active Directory, and join Major Incident bridges. Before that I was at Morgan Stanley, first on the service desk and then as an Advisory Pod technician supporting about 3,000 VIP and executive users.
             </p>
             <p>
-              I hold a BS in Computer Science from Utah State University and an AWS Certified Cloud Practitioner credential, with AWS SysOps Associate in progress.
+              I hold a BS in Computer Science from Utah State University and the AWS Certified Cloud Practitioner certification, and I'm working toward Microsoft Certified: Azure Administrator Associate (AZ-104).
             </p>
           </div>
         </div>
@@ -147,29 +148,28 @@ const HomePage: React.FC = () => {
       <section id="projects" className="py-24 px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <p className="text-sm font-medium text-blue-600 uppercase tracking-widest mb-3">Projects</p>
-          <h2 className="text-3xl font-bold mb-12">What I've shipped</h2>
+          <h2 className="text-3xl font-bold mb-12">What I've built</h2>
 
           {/* Featured project card */}
           <div className="border border-gray-200 rounded-2xl p-8 hover:border-gray-300 hover:shadow-lg transition-all duration-200 flex flex-col md:flex-row gap-8">
             <div className="flex-1">
-              <span className="inline-block text-xs font-medium text-green-600 bg-green-50 px-2.5 py-1 rounded-full mb-4">Featured Project</span>
-              <h3 className="text-2xl font-semibold mb-3">Spotify Stats App</h3>
+              <span className="inline-block text-xs font-medium text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full mb-4">Featured Project</span>
+              <h3 className="text-2xl font-semibold mb-3">Proxmox Home Lab and Secure Remote Access</h3>
               <p className="text-gray-500 leading-relaxed mb-6">
-                Visualize your top Spotify artists, songs, and playlists with secure OAuth 2.0 authentication and AWS-backed API integrations. Built with React, TypeScript, and deployed via AWS Amplify.
+                A repurposed gaming PC running Proxmox VE 9 that hosts my lab and self-hosted services. Two network bridges keep the Windows lab on its own isolated network, and remote access goes through Cloudflare Tunnel behind Cloudflare Access instead of a VPN or open inbound ports.
               </p>
-              <div className="flex flex-wrap gap-2 mb-6">
-                {['React', 'TypeScript', 'AWS Lambda', 'Spotify API', 'OAuth 2.0', 'AWS Amplify'].map((tag) => (
+              <div className="flex flex-wrap gap-2">
+                {['Proxmox VE', 'LXC', 'LVM-thin', 'Linux bridges', 'iptables NAT', 'Cloudflare Tunnel', 'Cloudflare Access'].map((tag) => (
                   <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200">{tag}</span>
                 ))}
               </div>
-              <Link to="/spotifystats" className="inline-flex items-center gap-1.5 text-sm font-medium text-green-600 hover:text-green-800 transition-colors">
-                Explore project →
-              </Link>
             </div>
             {/* Visual panel */}
-            <div className="md:w-56 rounded-xl bg-gradient-to-br from-green-50 to-emerald-100 border border-green-100 flex items-center justify-center min-h-40">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="#1DB954" opacity="0.8">
-                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+            <div className="md:w-56 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-100 flex items-center justify-center min-h-40">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.8">
+                <rect x="3" y="3" width="18" height="7" rx="1.5" />
+                <rect x="3" y="14" width="18" height="7" rx="1.5" />
+                <path d="M7 6.5h.01M7 17.5h.01M11 6.5h6M11 17.5h6" />
               </svg>
             </div>
           </div>
@@ -183,7 +183,7 @@ const HomePage: React.FC = () => {
           <p className="text-sm font-medium text-blue-600 uppercase tracking-widest mb-3">What I'm Building</p>
           <h2 className="text-3xl font-bold mb-4">Home Lab & Infrastructure</h2>
           <p className="text-gray-500 mb-12 max-w-xl">
-            A Proxmox-based home lab I'm building out as a real-world DevOps environment — from AD foundations to Kubernetes.
+            A Proxmox-based home lab I'm building out as a real-world DevOps environment, from AD foundations to Kubernetes.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -225,34 +225,35 @@ const HomePage: React.FC = () => {
             {[
               {
                 category: 'Infrastructure',
-                items: ['Windows Server', 'VMware vSphere', 'Active Directory', 'Proxmox', 'Linux'],
+                items: ['Windows Server', 'VMware vSphere/vCenter', 'Active Directory', 'Group Policy', 'DNS', 'Proxmox VE', 'Linux (Debian)'],
               },
               {
-                category: 'Cloud & IaC',
-                items: ['AWS (EC2, S3, IAM, Lambda)', 'Terraform', 'Ansible', 'GitHub Actions', 'CloudWatch'],
+                category: 'Cloud',
+                items: ['Microsoft Azure', 'Intune', 'AWS (EC2, S3, IAM, Lambda, CloudFormation)'],
               },
               {
-                category: 'Scripting & Dev',
-                items: ['PowerShell', 'Bash', 'Python', 'TypeScript', 'React'],
+                category: 'Scripting and Automation',
+                items: ['PowerShell', 'Bash', 'Python', 'systemd services and timers', 'Git'],
               },
               {
-                category: 'Monitoring & Ops',
-                items: ['Zabbix', 'Grafana', 'ServiceNow', 'Citrix', 'Intune'],
+                category: 'Containers and Networking',
+                items: ['Docker', 'Docker Compose', 'LXC', 'Cloudflare Tunnel', 'Cloudflare Zero Trust Access'],
               },
               {
-                category: 'Identity & Security',
-                items: ['Entra ID / Azure AD', 'SailPoint', 'Microsoft 365', 'Group Policy', 'RBAC'],
+                category: 'Identity and Tools',
+                items: ['CyberArk', 'RSA SecurID', 'MFA', 'Microsoft 365', 'ServiceNow', 'Citrix', 'Jira'],
               },
               {
-                category: 'Tools',
-                items: ['Git', 'Docker', 'VS Code', 'RamMap / Sysinternals', 'Jira'],
+                category: 'Currently learning',
+                items: ['Terraform', 'Azure administration (AZ-104)'],
+                learning: true,
               },
-            ].map(({ category, items }) => (
+            ].map(({ category, items, learning }) => (
               <div key={category}>
                 <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-3">{category}</h3>
                 <div className="flex flex-wrap gap-2">
                   {items.map((item) => (
-                    <span key={item} className="text-sm text-gray-600 bg-gray-100 border border-gray-200 px-3 py-1 rounded-full">
+                    <span key={item} className={`text-sm px-3 py-1 rounded-full ${learning ? 'text-blue-700 bg-blue-50 border border-dashed border-blue-300' : 'text-gray-600 bg-gray-100 border border-gray-200'}`}>
                       {item}
                     </span>
                   ))}
@@ -281,7 +282,7 @@ const HomePage: React.FC = () => {
                 <span className="text-xs px-2.5 py-1 rounded-full bg-green-50 text-green-600 font-medium">Earned</span>
               </div>
               <h3 className="font-semibold mb-1">AWS Certified Cloud Practitioner</h3>
-              <p className="text-sm text-gray-500">Amazon Web Services</p>
+              <p className="text-sm text-gray-500">Amazon Web Services · Issued Jan 2025</p>
             </div>
 
             <div className="border border-gray-200 bg-white rounded-2xl p-6">
@@ -293,14 +294,13 @@ const HomePage: React.FC = () => {
                 </div>
                 <span className="text-xs px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 font-medium">In Progress</span>
               </div>
-              <h3 className="font-semibold mb-1">AWS SysOps Administrator Associate</h3>
-              <p className="text-sm text-gray-500">Amazon Web Services</p>
+              <h3 className="font-semibold mb-1">Microsoft Certified: Azure Administrator Associate (AZ-104)</h3>
+              <p className="text-sm text-gray-500">Microsoft</p>
             </div>
 
             <div className="border border-dashed border-gray-200 bg-white rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-36">
               <span className="text-gray-300 text-3xl mb-2">+</span>
               <p className="text-sm text-gray-400">More on the way</p>
-              <p className="text-xs text-gray-300 mt-1">Terraform Associate · Network+</p>
             </div>
 
           </div>
@@ -313,18 +313,14 @@ const HomePage: React.FC = () => {
           <p className="text-sm font-medium text-blue-600 uppercase tracking-widest mb-3">Contact</p>
           <h2 className="text-3xl font-bold mb-4">Let's connect</h2>
           <p className="text-gray-500 mb-10 leading-relaxed">
-            Open to infrastructure, DevOps, and cloud engineering roles. Always happy to talk shop.
+            Open to systems administrator and infrastructure roles, on-prem or cloud. Always happy to talk shop.
           </p>
           <div className="flex justify-center flex-wrap gap-4">
-            <a href="mailto:jaxsonj.madison@gmail.com"
-              className="bg-gray-900 text-white px-7 py-3 rounded-full text-sm font-medium hover:bg-gray-700 transition-colors">
-              Email Me
-            </a>
             <a href="https://www.linkedin.com/in/jaxson-madison" target="_blank" rel="noopener noreferrer"
-              className="border border-gray-300 text-gray-700 px-7 py-3 rounded-full text-sm font-medium hover:border-gray-500 transition-colors">
+              className="bg-gray-900 text-white px-7 py-3 rounded-full text-sm font-medium hover:bg-gray-700 transition-colors">
               LinkedIn
             </a>
-            <a href="https://github.com/jaxsonmadison" target="_blank" rel="noopener noreferrer"
+            <a href="https://github.com/JaxsonM" target="_blank" rel="noopener noreferrer"
               className="border border-gray-300 text-gray-700 px-7 py-3 rounded-full text-sm font-medium hover:border-gray-500 transition-colors">
               GitHub
             </a>
