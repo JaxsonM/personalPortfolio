@@ -40,13 +40,30 @@ const ProjectPage: React.FC = () => {
     if (!project) return;
     setMarkdown(null);
     setFailed(false);
+
+    const fail = (reason: string) => {
+      console.warn(`Write-up for "${project.slug}" not rendered (${project.content}): ${reason}`);
+      setFailed(true);
+    };
+
+    // A misconfigured host can answer a Markdown request with the site's index.html,
+    // so check the response before rendering it as a write-up.
     fetch(project.content)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.text();
+      .then(async (res) => {
+        if (!res.ok) {
+          return fail(`response was not ok (HTTP ${res.status})`);
+        }
+        const contentType = res.headers.get('Content-Type') ?? '';
+        if (contentType.toLowerCase().includes('text/html')) {
+          return fail(`Content-Type is "${contentType}", so the server sent a web page instead of Markdown`);
+        }
+        const text = await res.text();
+        if (text.trimStart().toLowerCase().startsWith('<!doctype html')) {
+          return fail('body starts with "<!doctype html", so the server sent a web page instead of Markdown');
+        }
+        setMarkdown(text);
       })
-      .then(setMarkdown)
-      .catch(() => setFailed(true));
+      .catch((err) => fail(`request failed (${err})`));
   }, [project]);
 
   if (!project) return <NotFoundPage />;
@@ -67,7 +84,12 @@ const ProjectPage: React.FC = () => {
           ))}
         </div>
 
-        {failed && <p className="text-gray-500 mt-12">Sorry, this write-up couldn't be loaded. Please try again later.</p>}
+        {failed && (
+          <div className="mt-12 border border-gray-200 bg-gray-50 rounded-2xl p-6">
+            <p className="text-gray-600 mb-3">Sorry, this write-up couldn't be loaded. Please try again later.</p>
+            <Link to="/projects" className="text-sm font-medium text-blue-600 hover:text-blue-800">← Back to all projects</Link>
+          </div>
+        )}
         {!failed && markdown === null && <p className="text-gray-400 mt-12">Loading…</p>}
         {markdown !== null && <ReactMarkdown components={markdownComponents}>{markdown}</ReactMarkdown>}
       </article>
