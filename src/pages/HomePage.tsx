@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
+const statusStyles: Record<string, { badge: string; number: string }> = {
+  Complete: { badge: 'bg-green-50 text-green-600', number: 'text-green-500' },
+  'In Progress': { badge: 'bg-blue-50 text-blue-600', number: 'text-blue-500' },
+  'Up Next': { badge: 'bg-amber-50 text-amber-600', number: 'text-amber-500' },
+  Planned: { badge: 'bg-gray-100 text-gray-400', number: 'text-gray-300' },
+};
+
 const HomePage: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -183,28 +190,24 @@ const HomePage: React.FC = () => {
           <p className="text-sm font-medium text-blue-600 uppercase tracking-widest mb-3">What I'm Building</p>
           <h2 className="text-3xl font-bold mb-4">Home Lab & Infrastructure</h2>
           <p className="text-gray-500 mb-12 max-w-xl">
-            A Proxmox-based home lab I'm building out as a real-world DevOps environment, from AD foundations to Kubernetes.
+            A Proxmox home lab I use to practice real infrastructure work, from secure remote access and self-hosted services to Active Directory, networking, and automation.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             {[
-              { phase: '01', title: 'AD & Windows Foundation', desc: 'Active Directory, DNS, Group Policy, Windows Server 2022 VMs on Proxmox.', status: 'In Progress', color: 'blue' },
-              { phase: '02', title: 'Monitoring & Observability', desc: 'Zabbix and Grafana dashboards for infrastructure visibility across the lab.', status: 'Up Next', color: 'gray' },
-              { phase: '03', title: 'Linux Admin & Scripting', desc: 'Deepening Linux administration and automation with Bash and Python.', status: 'Planned', color: 'gray' },
-              { phase: '04', title: 'CI/CD Pipelines', desc: 'GitHub Actions workflows for automated testing and deployment.', status: 'Planned', color: 'gray' },
-              { phase: '05', title: 'Infrastructure as Code', desc: 'Terraform and Ansible for reproducible, version-controlled infrastructure.', status: 'Planned', color: 'gray' },
-              { phase: '06', title: 'Containers & Kubernetes', desc: 'k3s cluster deployment, containerized workloads, and Helm charts.', status: 'Planned', color: 'gray' },
-            ].map(({ phase, title, desc, status, color }) => (
+              { phase: '01', title: 'Proxmox host and secure remote access', desc: 'Proxmox VE 9 on a repurposed gaming PC, with remote access through Cloudflare Tunnel behind Cloudflare Access.', status: 'Complete' },
+              { phase: '02', title: 'Self-hosted services', desc: 'A Minecraft Bedrock server, a Lychee photo gallery, and a browser-based dev environment, each in its own LXC container.', status: 'Complete' },
+              { phase: '03', title: 'Windows Server and Active Directory lab', desc: 'Two domain controllers and a member server on an isolated network, built alongside an AZ-800 course.', status: 'In Progress' },
+              { phase: '04', title: 'Networking', desc: 'A dedicated OPNsense router/firewall and VLANs.', status: 'Planned' },
+              { phase: '05', title: 'Monitoring', desc: 'Host hardware temperatures plus a Raspberry Pi room sensor.', status: 'Planned' },
+              { phase: '06', title: 'Infrastructure as Code', desc: 'Managing lab infrastructure with Terraform.', status: 'Planned' },
+            ].map(({ phase, title, desc, status }) => (
               <div key={phase} className="flex gap-4 border border-gray-200 bg-white rounded-2xl p-5">
-                <span className={`text-xs font-mono font-bold mt-0.5 ${color === 'blue' ? 'text-blue-500' : 'text-gray-300'}`}>{phase}</span>
+                <span className={`text-xs font-mono font-bold mt-0.5 ${(statusStyles[status] ?? statusStyles.Planned).number}`}>{phase}</span>
                 <div className="flex-1">
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-start justify-between gap-3 mb-1">
                     <h3 className="font-semibold text-sm">{title}</h3>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      status === 'In Progress' ? 'bg-blue-50 text-blue-600' :
-                      status === 'Up Next' ? 'bg-amber-50 text-amber-600' :
-                      'bg-gray-100 text-gray-400'
-                    }`}>{status}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${(statusStyles[status] ?? statusStyles.Planned).badge}`}>{status}</span>
                   </div>
                   <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
                 </div>
