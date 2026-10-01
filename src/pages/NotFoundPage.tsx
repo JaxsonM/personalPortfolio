@@ -12,7 +12,7 @@ const NotFoundPage: React.FC = () => (
         <Link to="/" className="bg-gray-900 text-white px-7 py-3 rounded-full text-sm font-medium hover:bg-gray-700 transition-colors">
           Back to home
         </Link>
-        <Link to="/projects" className="border border-gray-300 text-gray-700 px-7 py-3 rounded-full text-sm font-medium hover:border-gray-500 transition-colors">
+        <Link to="/#projects" className="border border-gray-300 text-gray-700 px-7 py-3 rounded-full text-sm font-medium hover:border-gray-500 transition-colors">
           View projects
         </Link>
       </div>

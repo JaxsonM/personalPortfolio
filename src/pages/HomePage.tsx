@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import SiteFooter from '../components/SiteFooter';
 import { getStatusStyle } from '../components/statusStyles';
 import { projects } from '../content/projects';
@@ -11,6 +11,12 @@ const resumeUrl = '/Jaxson-Madison-Resume.pdf';
 const HomePage: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { hash } = useLocation();
+
+  // React Router doesn't jump to #section links on its own, so do it here (e.g. "Back to projects").
+  useEffect(() => {
+    if (hash) document.getElementById(hash.slice(1))?.scrollIntoView();
+  }, [hash]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -194,12 +200,6 @@ const HomePage: React.FC = () => {
             ))}
           </div>
 
-          <div className="mt-10 text-center">
-            <Link to="/projects" className="inline-block border border-gray-300 text-gray-700 px-7 py-3 rounded-full text-sm font-medium hover:border-gray-500 transition-colors">
-              View all projects
-            </Link>
-          </div>
-
         </div>
       </section>
 
@@ -335,7 +335,7 @@ const HomePage: React.FC = () => {
           <p className="text-sm font-medium text-blue-600 uppercase tracking-widest mb-3">Contact</p>
           <h2 className="text-3xl font-bold mb-4">Let's connect</h2>
           <p className="text-gray-500 mb-10 leading-relaxed">
-            Open to systems administrator and infrastructure roles, on-prem or cloud. Always happy to talk shop.
+            Open to systems administrator and infrastructure roles, on-prem or cloud.
           </p>
           <div className="flex justify-center flex-wrap gap-4">
             <a href="https://www.linkedin.com/in/jaxson-madison" target="_blank" rel="noopener noreferrer"

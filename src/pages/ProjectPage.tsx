@@ -92,7 +92,7 @@ const ProjectPage: React.FC = () => {
   return (
     <PageShell>
       <article className="max-w-3xl mx-auto px-6 py-16">
-        <Link to="/projects" className="text-sm text-gray-500 hover:text-gray-900">← All projects</Link>
+        <Link to="/#projects" className="text-sm text-gray-500 hover:text-gray-900">← Back to projects</Link>
         <div className="mt-6 mb-4">
           <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${getStatusStyle(project.status).badge}`}>
             {project.status}
@@ -108,7 +108,7 @@ const ProjectPage: React.FC = () => {
         {failed && (
           <div className="mt-12 border border-gray-200 bg-gray-50 rounded-2xl p-6">
             <p className="text-gray-600 mb-3">Sorry, this write-up couldn't be loaded. Please try again later.</p>
-            <Link to="/projects" className="text-sm font-medium text-blue-600 hover:text-blue-800">← Back to all projects</Link>
+            <Link to="/#projects" className="text-sm font-medium text-blue-600 hover:text-blue-800">← Back to projects</Link>
           </div>
         )}
         {!failed && markdown === null && <p className="text-gray-400 mt-12">Loading…</p>}

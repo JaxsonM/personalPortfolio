@@ -18,7 +18,7 @@ const PageShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <Link to="/" className="font-semibold tracking-tight text-lg">JM</Link>
           <nav className="flex items-center gap-6 text-sm text-gray-600">
             <Link to="/" className="hover:text-gray-900">Home</Link>
-            <Link to="/projects" className="hover:text-gray-900">Projects</Link>
+            <Link to="/#projects" className="hover:text-gray-900">Projects</Link>
             <a href="https://github.com/JaxsonM" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900">
               GitHub
             </a>
