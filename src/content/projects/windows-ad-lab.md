@@ -1,6 +1,6 @@
 ## Overview
 
-A Windows Server and Active Directory environment I'm building from scratch alongside an AZ-802 course on Udemy, as preparation for the AZ-802 Windows Server Administrator Associate certification. I work with Active Directory in an enterprise environment, but always inside a domain someone else designed. Building one myself shows me the parts I don't see day to day: how a forest gets created, how domain controllers find and back each other up, and how much of it depends on DNS.
+A Windows Server and Active Directory environment I'm building from scratch alongside an AZ-802 course on Udemy, as preparation for the Windows Server Administrator Associate certification. I work with Active Directory in an enterprise environment, but always inside a domain someone else designed. Building one myself shows me the parts I don't see day to day: how a forest gets created, how domain controllers find and back each other up, and how much of it depends on DNS.
 
 This is a work in progress. I'm about a third of the way through the course, and I add to the lab as I go.
 

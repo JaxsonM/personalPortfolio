@@ -145,7 +145,7 @@ const HomePage: React.FC = () => {
               I'm a systems administrator with a background in IT support, building toward cloud infrastructure. Outside of work I run a Proxmox home lab where I practice the skills I want to grow: Active Directory, networking, self-hosted services, and automation.
             </p>
             <p>
-              Since March 2026 I've been a Windows Server Administrator at Conduent, working in a 24x7 Global Command Center. I monitor and remediate servers, work with VMware and Active Directory, and join Major Incident bridges. Before that I was at Morgan Stanley, first on the service desk and then as an Advisory Pod technician supporting about 3,000 VIP and executive users.
+              Since March 2026 I've been a Windows Server Administrator at Conduent, working in a 24x7x365 Global Command Center. I monitor and remediate servers, work with VMware and Active Directory, and join Major Incident bridges. Before that I was at Morgan Stanley, first on the service desk and then as an Advisory Pod technician supporting about 3,000 VIP and executive users.
             </p>
             <p>
               I hold a BS in Computer Science from Utah State University and the AWS Certified Cloud Practitioner certification, and I'm working toward Microsoft Certified: Windows Server Administrator Associate (AZ-802).
