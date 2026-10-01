@@ -11,7 +11,7 @@ This site is a project in its own right. It started as a React app for experimen
 | **Deploys** | Every push to the main branch on GitHub triggers a new build |
 | **Backend** | A separate Amplify app for the Spotify feature: API Gateway, Lambda, AppSync, and Cognito |
 | **Write-ups** | Markdown files, rendered in the browser |
-| **Dev environment** | VS Code in the browser on my [home lab](/projects/browser-dev-environment), with a live preview behind Cloudflare Access |
+| **Dev environment** | [VS Code in the browser](/projects/browser-dev-environment) on my home lab, with a live preview behind Cloudflare Access |
 
 ## How it's built
 
@@ -45,17 +45,9 @@ My first attempt at a permanent fix, removing the extension list entirely, broke
 
 Even after fixing a rule, the old broken response could stick around. The site is served through CloudFront, which caches files at its edge servers for a long time. A cached copy of the wrong response kept being served until I redeployed, which clears the cache.
 
-### Edits that never showed up in my preview
-
-While tuning the size of the diagram, nothing I changed had any effect, even an absurdly small value. The code on the dev server was correct, so I checked the browser's network tab: Cloudflare was answering with `cf-cache-status: HIT` and an age of almost two hours.
-
-The development server doesn't send caching headers for its JavaScript, and when a file has none, Cloudflare caches it at the edge. A hard refresh doesn't help, because Cloudflare ignores the browser's request for a fresh copy. Every edit I had made in those two hours had been invisible. A Cloudflare cache rule that bypasses caching for the preview hostname fixed it for good. The production site doesn't have this problem, because its builds give every JavaScript file a new name when it changes.
-
-One more issue was hiding behind the caching one: the diagram's SVG had no built-in size, so browsers didn't shrink it reliably. Giving the SVG width and height attributes fixed that.
-
 ### Secrets in a public repository
 
-While cleaning up the repo, I found an API key and a client secret committed in an Amplify configuration file. The repository is public, and they had been in its history for over a year. Deleting them from the file wouldn't have helped, since anyone can read old commits. The real fix was to revoke them: I rotated both, deleted the account behind the unused key entirely, and removed the old backends that needed them.
+While cleaning up the repo from my [browser-based dev environment](/projects/browser-dev-environment), I found an API key and a client secret committed in an Amplify configuration file. The repository is public, and they had been in its history for over a year. Deleting them from the file wouldn't have helped, since anyone can read old commits. The real fix was to revoke them: I rotated both, deleted the account behind the unused key entirely, and removed the old backends that needed them.
 
 The cleanup turned up a second lesson. An older, unused version of the movie search code expected the key in an environment variable starting with `REACT_APP_`. That one never shipped, but it would have been a leak too: Create React App copies every `REACT_APP_` variable into the public JavaScript bundle, where anyone can read it. Secrets belong on the server side, in the Lambda function's own configuration.
 
@@ -64,6 +56,7 @@ The cleanup turned up a second lesson. An older, unused version of the movie sea
 - **Build warnings can fail a deploy.** When `CI=true` is set, as it is on most build services, Create React App treats lint warnings like unused variables as errors. I now run `CI=true npm run build` before pushing.
 - **Photos carry hidden data.** Camera and phone photos include metadata such as the camera model, creator details, and sometimes GPS coordinates. I strip it before publishing an image.
 - **Check what's staged before committing.** `git rm` stages a deletion immediately, so it rode along in an unrelated commit. Running `git status` before each commit catches that.
+- **SVGs need a built-in size.** My diagram's SVG had no width or height attributes, so browsers didn't scale it reliably. Adding them fixed it.
 
 ## Cleanup along the way
 
@@ -72,5 +65,6 @@ The repo had collected a lot of experiments. I removed the pages and code for an
 ## What's next
 
 - **Move the Spotify secret into AWS Systems Manager Parameter Store** using Amplify's function secrets, and stop committing Amplify's configuration file, so a secret can never end up in the repo again.
+- **A branch-based workflow,** with Amplify building a separate preview for each branch, so changes are reviewed before they reach the live site.
 - **Decide the backend's future.** The Amplify Gen 1 CLI reaches end of life on May 1, 2027, so the Spotify backend either moves to Gen 2 or retires.
 - **Move off Create React App**, which is no longer maintained, most likely to Vite.
