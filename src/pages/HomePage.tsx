@@ -77,13 +77,13 @@ const HomePage: React.FC = () => {
         </div>
 
         <div className="relative max-w-5xl mx-auto w-full flex flex-col md:flex-row items-center gap-12">
-          {/* Photo placeholder */}
+          {/* Headshot */}
           <div className="flex-shrink-0">
             <img
-  src="/jaxson.jpg"
-  alt="Jaxson Madison"
-  className="w-40 h-40 md:w-52 md:h-52 rounded-2xl object-cover object-top"
-/>
+              src="/headshot.jpeg"
+              alt="Jaxson Madison"
+              className="w-40 h-40 md:w-52 md:h-52 rounded-2xl object-cover object-top"
+            />
           </div>
           {/* Hero text */}
           <div className="flex-1 text-center md:text-left">
