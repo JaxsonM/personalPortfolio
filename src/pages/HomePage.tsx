@@ -108,14 +108,6 @@ const HomePage: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-gray-600 animate-bounce">
-          <span className="text-xs tracking-widest uppercase">Scroll</span>
-          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M6 9l6 6 6-6"/>
-          </svg>
-        </div>
       </section>
 
       {/* ABOUT */}
