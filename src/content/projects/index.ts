@@ -4,6 +4,7 @@ import windowsAdLab from './windows-ad-lab.md';
 import minecraftBedrockServer from './minecraft-bedrock-server.md';
 import photoGallery from './photo-gallery.md';
 import browserDevEnvironment from './browser-dev-environment.md';
+import portfolioSite from './portfolio-site.md';
 
 export interface Project {
   slug: string;
@@ -61,6 +62,15 @@ export const projects: Project[] = [
     tags: ['code-server', 'Debian', 'LXC', 'systemd', 'Cloudflare Tunnel', 'Cloudflare Access'],
     status: 'Complete',
     content: browserDevEnvironment,
+  },
+  {
+    slug: 'portfolio-site',
+    title: 'This Site: jaxsoncodes.com',
+    summary:
+      'A React site on AWS Amplify, and everything it taught me about rewrite rules, CDN caching, and keeping secrets out of a public repository.',
+    tags: ['React', 'TypeScript', 'Tailwind CSS', 'AWS Amplify', 'CloudFront', 'Cloudflare'],
+    status: 'In Progress',
+    content: portfolioSite,
   },
 ];
 
