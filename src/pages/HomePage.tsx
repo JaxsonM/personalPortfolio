@@ -6,6 +6,7 @@ import { projects } from '../content/projects';
 
 const featuredProject = projects.find((p) => p.featured);
 const otherProjects = projects.filter((p) => !p.featured);
+const resumeUrl = '/Jaxson-Madison-Resume.pdf';
 
 const HomePage: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -105,6 +106,10 @@ const HomePage: React.FC = () => {
                 className="border border-gray-600 text-gray-300 px-6 py-2.5 rounded-full text-sm font-medium hover:border-gray-400 hover:text-white transition-colors">
                 Get in Touch
               </button>
+              <a href={resumeUrl} target="_blank" rel="noopener noreferrer"
+                className="border border-gray-600 text-gray-300 px-6 py-2.5 rounded-full text-sm font-medium hover:border-gray-400 hover:text-white transition-colors">
+                Resume
+              </a>
             </div>
           </div>
         </div>
@@ -341,7 +346,17 @@ const HomePage: React.FC = () => {
               className="border border-gray-300 text-gray-700 px-7 py-3 rounded-full text-sm font-medium hover:border-gray-500 transition-colors">
               GitHub
             </a>
+            <a href={resumeUrl} target="_blank" rel="noopener noreferrer"
+              className="border border-gray-300 text-gray-700 px-7 py-3 rounded-full text-sm font-medium hover:border-gray-500 transition-colors">
+              Resume
+            </a>
           </div>
+          <p className="mt-8 text-sm text-gray-500">
+            Or email me at{' '}
+            <a href="mailto:jaxsonj.madison@gmail.com" className="font-medium text-blue-600 hover:text-blue-800">
+              jaxsonj.madison@gmail.com
+            </a>
+          </p>
         </div>
       </section>
 
