@@ -95,13 +95,13 @@ const HomePage: React.FC = () => {
           {/* Hero text */}
           <div className="flex-1 text-center md:text-left">
             <p className="text-sm font-medium text-blue-400 tracking-wide leading-relaxed mb-4 max-w-xl">
-              Systems Administrator | Windows Server, VMware & Azure | Scripting & Infrastructure Automation | AWS Certified
+              Systems Administrator | Windows Server, VMware & Azure | PowerShell & Bash Scripting | AWS Certified
             </p>
             <h1 className="text-5xl md:text-6xl font-bold text-white leading-tight mb-4">
               Jaxson<br />Madison
             </h1>
             <p className="text-lg text-gray-400 max-w-xl leading-relaxed mb-8">
-              I keep Windows and VMware infrastructure healthy in a 24x7 enterprise environment, and I'm building toward Azure and infrastructure automation through a hands-on home lab.
+              I keep Windows and VMware infrastructure healthy in a 24x7x365 enterprise environment, and I'm deepening my Azure skills while building toward infrastructure automation in a hands-on home lab.
             </p>
             <div className="flex flex-wrap gap-3 justify-center md:justify-start">
               <button onClick={() => scrollTo('projects')}
@@ -130,9 +130,9 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10 pb-10 border-b border-gray-200">
             {[
               { value: '2+', label: 'Years in IT' },
-              { value: '1', label: 'Cloud certification' },
-              { value: '24x7', label: 'Global ops experience' },
-              { value: '6', label: 'Home lab phases' },
+              { value: '24x7x365', label: 'Global ops experience' },
+              { value: String(projects.length), label: 'Project write-ups' },
+              { value: '7', label: 'VMs and containers in my lab' },
             ].map(({ value, label }) => (
               <div key={label}>
                 <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
@@ -251,7 +251,7 @@ const HomePage: React.FC = () => {
               },
               {
                 category: 'Cloud',
-                items: ['Microsoft Azure', 'Intune', 'AWS (EC2, S3, IAM, Lambda, CloudFormation)'],
+                items: ['Microsoft Azure', 'Intune', 'AWS (EC2, S3, IAM, Lambda)'],
               },
               {
                 category: 'Scripting and Automation',
