@@ -1,0 +1,264 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 2530" width="720" height="2530" role="img" aria-labelledby="diagram-title diagram-desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif">
+  <title id="diagram-title">How players connect to the Minecraft Bedrock server</title>
+  <desc id="diagram-desc">
+    PC and mobile players look up mc.sophisticants.com in Cloudflare DNS, which answers with the home
+    public IP. The record is DNS only, not proxied, because Cloudflare's proxy only handles web traffic.
+    Xbox players set their DNS to BedrockConnect at 104.238.130.180 with 8.8.8.8 as a backup. Joining a
+    featured server opens BedrockConnect's server list instead, where the player enters the server address.
+    BedrockConnect then transfers the player, and the Xbox connects directly to the home server on the same
+    path as PC players, so BedrockConnect is not in the gameplay path. Both paths reach the Xfinity gateway,
+    where CyberSecure blocks IPs on threat reputation lists, then port forwards send TCP 19132 and UDP
+    19140 to 19155 to the bedrock container, CT 105 at 10.0.0.202, on the Proxmox host. The server signs in
+    to Microsoft's Xbox Live services at startup and Xbox Live verifies every player. NetherNet connects in
+    two phases: a TCP handshake on port 19132, a reply telling the player to send gameplay to the home public
+    IP on UDP 19140 to 19155, then gameplay over UDP.
+  </desc>
+
+  <defs>
+    <!-- Arrowheads. The base sits at the end of the line and the tip extends past it,
+         so each line stops short of its target by the arrowhead's length (14). -->
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-violet" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#d97706"/>
+    </marker>
+    <marker id="arrow-slate" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="720" height="2530" fill="#ffffff"/>
+
+  <!-- ============ INTERNET ============ -->
+  <g id="internet">
+    <text x="20" y="32" font-size="20" font-weight="600" fill="#6b7280" letter-spacing="2">INTERNET</text>
+  </g>
+
+  <!-- Microsoft / Xbox Live: external dependency for sign-in and identity -->
+  <g id="xbox-live">
+    <rect x="20" y="48" width="680" height="134" rx="12" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+    <text x="36" y="80" font-size="22" font-weight="700" fill="#111827">Microsoft / Xbox Live</text>
+    <text x="36" y="108" font-size="20" fill="#4b5563">Server signs in to the signaling service at startup.</text>
+    <text x="36" y="134" font-size="20" fill="#4b5563">online-mode=true: Xbox Live verifies every player,</text>
+    <text x="36" y="160" font-size="20" fill="#4b5563">so gamertags can't be faked.</text>
+  </g>
+
+  <!-- Cloudflare DNS: the record PC and mobile players look up -->
+  <g id="cloudflare-dns">
+    <rect x="20" y="200" width="320" height="256" rx="16" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+    <text x="36" y="232" font-size="22" font-weight="700" fill="#111827">Cloudflare DNS</text>
+
+    <rect x="36" y="248" width="288" height="130" rx="10" fill="#ffffff" stroke="#6ee7b7" stroke-width="2"/>
+    <text x="52" y="278" font-size="20" font-weight="700" fill="#111827">mc.sophisticants.com</text>
+    <text x="52" y="306" font-size="20" fill="#4b5563">Home public IP (dynamic)</text>
+    <text x="52" y="334" font-size="20" fill="#4b5563">A record, DNS only</text>
+    <text x="52" y="360" font-size="20" fill="#4b5563">(grey cloud, not proxied)</text>
+
+    <text x="36" y="410" font-size="20" fill="#6b7280">The proxy only handles web</text>
+    <text x="36" y="436" font-size="20" fill="#6b7280">traffic, not Minecraft's UDP.</text>
+  </g>
+
+  <!-- BedrockConnect: console workaround, only used to hand the player off -->
+  <g id="bedrockconnect">
+    <rect x="370" y="200" width="300" height="256" rx="12" fill="#ffffff" stroke="#c4b5fd" stroke-width="2"/>
+    <text x="386" y="232" font-size="22" font-weight="700" fill="#111827">BedrockConnect</text>
+    <text x="386" y="260" font-size="20" fill="#111827">DNS 104.238.130.180</text>
+    <text x="386" y="290" font-size="20" fill="#4b5563">answers featured-server</text>
+    <text x="386" y="316" font-size="20" fill="#4b5563">lookups with its own IP,</text>
+    <text x="386" y="342" font-size="20" fill="#4b5563">opening a server list.</text>
+    <text x="386" y="372" font-size="20" fill="#4b5563">Player enters</text>
+    <text x="386" y="398" font-size="20" font-weight="700" fill="#111827">mc.sophisticants.com</text>
+    <text x="386" y="424" font-size="20" fill="#4b5563">port 19132.</text>
+  </g>
+
+  <!-- Players -->
+  <g id="players">
+    <rect x="20" y="596" width="320" height="96" rx="12" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
+    <text x="180" y="630" font-size="22" font-weight="700" fill="#111827" text-anchor="middle">PC &amp; mobile players</text>
+    <text x="180" y="658" font-size="20" fill="#6b7280" text-anchor="middle">Path A</text>
+
+    <rect x="370" y="596" width="300" height="176" rx="12" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
+    <text x="520" y="630" font-size="22" font-weight="700" fill="#111827" text-anchor="middle">Xbox players</text>
+    <text x="520" y="658" font-size="20" fill="#6b7280" text-anchor="middle">Path B</text>
+    <text x="420" y="700" font-size="20" fill="#111827">Manual DNS:</text>
+    <text x="420" y="726" font-size="20" fill="#4b5563">104.238.130.180</text>
+    <text x="420" y="752" font-size="20" fill="#4b5563">secondary 8.8.8.8</text>
+  </g>
+
+  <!-- ============ HOME NETWORK ============ -->
+  <g id="home-network">
+    <rect x="10" y="880" width="700" height="944" rx="18" fill="#f3f4f6" stroke="#9ca3af" stroke-width="2"/>
+    <text x="26" y="912" font-size="22" font-weight="700" fill="#374151">Home network</text>
+  </g>
+
+  <!-- Xfinity gateway: NAT, first security layer, and the port forwards -->
+  <g id="gateway">
+    <rect x="30" y="932" width="640" height="408" rx="14" fill="#ffffff" stroke="#6b7280" stroke-width="2"/>
+    <text x="46" y="966" font-size="22" font-weight="700" fill="#111827">Xfinity gateway (10.0.0.1)</text>
+    <text x="46" y="994" font-size="20" fill="#6b7280">NAT for the whole house</text>
+
+    <rect x="46" y="1012" width="608" height="102" rx="10" fill="#fef2f2" stroke="#fca5a5" stroke-width="2"/>
+    <text x="62" y="1042" font-size="20" fill="#6b7280"><tspan font-weight="700" fill="#111827">CyberSecure</tspan> (first security layer)</text>
+    <text x="62" y="1070" font-size="20" fill="#4b5563">Blocks inbound connections from IPs on</text>
+    <text x="62" y="1096" font-size="20" fill="#4b5563">threat reputation lists</text>
+
+    <rect x="46" y="1128" width="608" height="160" rx="10" fill="#fffbeb" stroke="#fcd34d" stroke-width="2"/>
+    <text x="62" y="1158" font-size="20" font-weight="700" fill="#111827">Port forwards to 10.0.0.202</text>
+    <text x="62" y="1186" font-size="20" fill="#4b5563"><tspan font-weight="700" fill="#b45309">TCP 19132</tspan>  connection setup (handshake)</text>
+    <text x="62" y="1214" font-size="20" fill="#4b5563"><tspan font-weight="700" fill="#b45309">UDP 19140-19155</tspan>  gameplay, one port per player</text>
+    <text x="62" y="1242" font-size="20" fill="#6b7280">10.0.0.202 is a DHCP reservation tied to</text>
+    <text x="62" y="1268" font-size="20" fill="#6b7280">the container's MAC address</text>
+
+    <text x="46" y="1320" font-size="20" fill="#4b5563"><tspan font-weight="700" fill="#111827">Hairpin NAT:</tspan> players at home can use the domain too</text>
+  </g>
+
+  <!-- ============ PROXMOX VE HOST ============ -->
+  <g id="proxmox-host">
+    <rect x="30" y="1460" width="640" height="348" rx="16" fill="#ffffff" stroke="#6b7280" stroke-width="2"/>
+    <text x="46" y="1494" font-size="22" font-weight="700" fill="#111827">Proxmox VE 9.2 host</text>
+    <text x="46" y="1520" font-size="20" fill="#6b7280">10.0.0.200</text>
+  </g>
+
+  <!-- ============ vmbr0: HOME NETWORK BRIDGE ============ -->
+  <g id="vmbr0">
+    <rect x="46" y="1538" width="608" height="254" rx="14" fill="#eff6ff" stroke="#bfdbfe" stroke-width="2"/>
+    <text x="62" y="1568" font-size="20" font-weight="700" fill="#1d4ed8">vmbr0</text>
+    <text x="62" y="1594" font-size="20" fill="#6b7280">home network bridge</text>
+
+    <rect x="62" y="1612" width="576" height="164" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="78" y="1644" font-size="22" font-weight="700" fill="#111827">CT 105: bedrock</text>
+    <text x="78" y="1672" font-size="20" fill="#4b5563">10.0.0.202 · unprivileged LXC · Debian 12</text>
+    <text x="78" y="1700" font-size="20" fill="#4b5563">Bedrock Dedicated Server, transport=nethernet</text>
+    <text x="78" y="1728" font-size="20" fill="#4b5563">online-mode=true · allow-list on</text>
+    <text x="78" y="1756" font-size="20" fill="#6b7280">Inside the container: see the next diagram</text>
+  </g>
+
+  <!-- ============ CONNECTIONS ============ -->
+  <!-- Path A: DNS lookup and answer -->
+  <g id="path-a-dns" stroke="#059669" stroke-width="3" fill="none">
+    <line x1="110" y1="596" x2="110" y2="470" marker-end="url(#arrow-green)"/>
+    <line x1="250" y1="456" x2="250" y2="582" marker-end="url(#arrow-green)"/>
+  </g>
+  <text x="88" y="532" font-size="20" fill="#047857" text-anchor="end">lookup</text>
+  <text x="272" y="532" font-size="20" fill="#047857">answer</text>
+
+  <!-- Path B: BedrockConnect handoff (never carries gameplay) -->
+  <g id="path-b-handoff" stroke="#7c3aed" stroke-width="3" fill="none">
+    <line x1="420" y1="596" x2="420" y2="470" marker-end="url(#arrow-violet)"/>
+    <line x1="630" y1="456" x2="630" y2="582" marker-end="url(#arrow-violet)"/>
+  </g>
+  <text x="442" y="514" font-size="20" fill="#6d28d9">featured server</text>
+  <text x="608" y="552" font-size="20" fill="#6d28d9" text-anchor="end">server list menu</text>
+
+  <!-- Game traffic: both paths reach the gateway the same way -->
+  <g id="game-traffic" stroke="#d97706" stroke-width="3" stroke-dasharray="9 6" fill="none">
+    <line x1="230" y1="692" x2="230" y2="918" marker-end="url(#arrow-amber)"/>
+    <line x1="520" y1="772" x2="520" y2="918" marker-end="url(#arrow-amber)"/>
+    <!-- Gateway to the container: the two NetherNet phases -->
+    <line x1="330" y1="1340" x2="330" y2="1598" marker-end="url(#arrow-amber)"/>
+    <line x1="560" y1="1340" x2="560" y2="1598" marker-end="url(#arrow-amber)"/>
+  </g>
+
+  <!-- Label pills drawn on top of the game traffic lines -->
+  <g id="game-traffic-labels">
+    <rect x="90" y="730" width="240" height="40" rx="20" fill="#ffffff" stroke="#d97706" stroke-width="2"/>
+    <text x="138" y="757" font-size="20" font-weight="700" fill="#b45309">Home public IP</text>
+
+    <rect x="340" y="796" width="320" height="64" rx="32" fill="#ffffff" stroke="#d97706" stroke-width="2"/>
+    <text x="388" y="822" font-size="20" font-weight="700" fill="#b45309">Transfer, then direct</text>
+    <text x="388" y="848" font-size="20" fill="#4b5563">not via BedrockConnect</text>
+
+    <rect x="250" y="1394" width="160" height="40" rx="20" fill="#ffffff" stroke="#d97706" stroke-width="2"/>
+    <text x="330" y="1421" font-size="20" font-weight="700" fill="#b45309" text-anchor="middle">TCP 19132</text>
+
+    <rect x="445" y="1394" width="230" height="40" rx="20" fill="#ffffff" stroke="#d97706" stroke-width="2"/>
+    <text x="560" y="1421" font-size="20" font-weight="700" fill="#b45309" text-anchor="middle">UDP 19140-19155</text>
+  </g>
+
+  <!-- The server's outbound sign-in to Xbox Live -->
+  <path id="xbox-live-sign-in" d="M638,1680 H686 V196" stroke="#64748b" stroke-width="3" stroke-dasharray="2 7"
+        stroke-linecap="round" fill="none" marker-end="url(#arrow-slate)"/>
+
+  <!-- Step badges, drawn last so they sit on top of their lines -->
+  <g id="step-badges" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">
+    <circle cx="110" cy="526" r="17" fill="#059669"/><text x="110" y="532">A1</text>
+    <circle cx="250" cy="526" r="17" fill="#059669"/><text x="250" y="532">A2</text>
+    <circle cx="114" cy="750" r="17" fill="#d97706"/><text x="114" y="756">A3</text>
+
+    <circle cx="396" cy="694" r="17" fill="#7c3aed"/><text x="396" y="700">B1</text>
+    <circle cx="420" cy="508" r="17" fill="#7c3aed"/><text x="420" y="514">B2</text>
+    <circle cx="630" cy="546" r="17" fill="#7c3aed"/><text x="630" y="552">B3</text>
+    <circle cx="364" cy="828" r="17" fill="#d97706"/><text x="364" y="834">B4</text>
+
+    <circle cx="330" cy="1368" r="17" fill="#d97706"/><text x="330" y="1374">N1</text>
+    <circle cx="560" cy="1368" r="17" fill="#d97706"/><text x="560" y="1374">N3</text>
+  </g>
+
+  <!-- ============ NETHERNET: TWO-PHASE CONNECTION ============ -->
+  <g id="nethernet">
+    <rect x="20" y="1856" width="680" height="416" rx="16" fill="#fffbeb" stroke="#fcd34d" stroke-width="2"/>
+    <text x="36" y="1888" font-size="22" font-weight="700" fill="#111827">NetherNet: a two-phase connection</text>
+    <text x="36" y="1916" font-size="20" fill="#6b7280">WebRTC-based. This server version rejects RakNet.</text>
+
+    <!-- Lifelines -->
+    <rect x="40" y="1936" width="160" height="44" rx="10" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
+    <text x="120" y="1965" font-size="20" font-weight="700" fill="#111827" text-anchor="middle">Player</text>
+    <rect x="480" y="1936" width="210" height="44" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="585" y="1965" font-size="20" font-weight="700" fill="#111827" text-anchor="middle">Bedrock server</text>
+    <line x1="120" y1="1980" x2="120" y2="2190" stroke="#d1d5db" stroke-width="2"/>
+    <line x1="585" y1="1980" x2="585" y2="2190" stroke="#d1d5db" stroke-width="2"/>
+
+    <!-- Messages -->
+    <g stroke="#d97706" stroke-width="3" stroke-dasharray="9 6" fill="none">
+      <line x1="120" y1="2030" x2="571" y2="2030" marker-end="url(#arrow-amber)"/>
+      <line x1="585" y1="2100" x2="134" y2="2100" marker-end="url(#arrow-amber)"/>
+      <line x1="120" y1="2170" x2="571" y2="2170" marker-end="url(#arrow-amber)"/>
+    </g>
+    <text x="365" y="2018" font-size="20" fill="#4b5563" text-anchor="middle"><tspan font-weight="700" fill="#b45309">TCP 19132:</tspan> connection setup</text>
+    <text x="352" y="2062" font-size="20" fill="#4b5563" text-anchor="middle">Server replies: send gameplay to</text>
+    <text x="352" y="2088" font-size="20" font-weight="700" fill="#b45309" text-anchor="middle">Home public IP:19140-19155</text>
+    <text x="365" y="2158" font-size="20" fill="#4b5563" text-anchor="middle"><tspan font-weight="700" fill="#b45309">UDP 19140-19155:</tspan> gameplay</text>
+
+    <g font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">
+      <circle cx="150" cy="2030" r="17" fill="#d97706"/><text x="150" y="2036">N1</text>
+      <circle cx="555" cy="2100" r="17" fill="#d97706"/><text x="555" y="2106">N2</text>
+      <circle cx="150" cy="2170" r="17" fill="#d97706"/><text x="150" y="2176">N3</text>
+    </g>
+
+    <text x="36" y="2226" font-size="20" fill="#4b5563">server-udp-ports advertises the public address, so outside</text>
+    <text x="36" y="2252" font-size="20" fill="#4b5563">players aren't sent the private 10.0.0.202.</text>
+  </g>
+
+  <!-- ============ LEGEND ============ -->
+  <g id="legend">
+    <text x="20" y="2314" font-size="20" font-weight="700" fill="#374151">Legend</text>
+
+    <line x1="20" y1="2348" x2="68" y2="2348" stroke="#059669" stroke-width="3" marker-end="url(#arrow-green)"/>
+    <text x="100" y="2355" font-size="20" fill="#374151">DNS lookup and answer</text>
+
+    <line x1="20" y1="2386" x2="68" y2="2386" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrow-violet)"/>
+    <text x="100" y="2393" font-size="20" fill="#374151">BedrockConnect handoff (Xbox only)</text>
+
+    <line x1="20" y1="2424" x2="68" y2="2424" stroke="#d97706" stroke-width="3" stroke-dasharray="9 6"
+          marker-end="url(#arrow-amber)"/>
+    <text x="100" y="2431" font-size="20" fill="#374151">Game traffic through the port forward</text>
+
+    <line x1="20" y1="2462" x2="68" y2="2462" stroke="#64748b" stroke-width="3" stroke-dasharray="2 7"
+          stroke-linecap="round" marker-end="url(#arrow-slate)"/>
+    <text x="100" y="2469" font-size="20" fill="#374151">Outbound sign-in from the server</text>
+
+    <circle cx="44" cy="2500" r="17" fill="#6b7280"/>
+    <text x="44" y="2506" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">A1</text>
+    <text x="100" y="2507" font-size="20" fill="#374151">Steps: A = PC/mobile, B = Xbox, N = NetherNet</text>
+  </g>
+</svg>

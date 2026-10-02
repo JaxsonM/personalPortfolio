@@ -6,6 +6,15 @@ import photoGallery from './photo-gallery.md';
 import browserDevEnvironment from './browser-dev-environment.md';
 import portfolioSite from './portfolio-site.md';
 
+// A diagram too tall to show inline, so it gets its own page linked from the write-up.
+export interface Diagram {
+  slug: string;
+  title: string;
+  description: string;
+  src: string;
+  alt: string;
+}
+
 export interface Project {
   slug: string;
   title: string;
@@ -14,6 +23,7 @@ export interface Project {
   status: 'Complete' | 'In Progress' | 'Planned';
   featured?: boolean;
   content: string; // URL of the bundled .md file
+  diagrams?: Diagram[];
 }
 
 export const projects: Project[] = [
@@ -44,6 +54,22 @@ export const projects: Project[] = [
     tags: ['Debian', 'LXC', 'systemd', 'Bash', 'Cloudflare API', 'DNS'],
     status: 'Complete',
     content: minecraftBedrockServer,
+    diagrams: [
+      {
+        slug: 'network',
+        title: 'How players connect',
+        description: 'PC and Xbox connection paths, the home gateway, and NetherNet\'s two-phase connection.',
+        src: '/images/minecraft-network-diagram.svg',
+        alt: 'Diagram of how PC and Xbox players reach the Bedrock server through Cloudflare DNS or BedrockConnect, the Xfinity gateway port forwards, and the Proxmox container, plus the TCP handshake and UDP gameplay phases',
+      },
+      {
+        slug: 'container',
+        title: 'Inside the server container',
+        description: 'The systemd service, the DDNS and health check timers, the admin path, and the security layers.',
+        src: '/images/minecraft-container-diagram.svg',
+        alt: 'Diagram of the Bedrock container showing the systemd service, console pipe and journald, the DDNS and health check timers with their API calls, the outbound Cloudflare Tunnel admin path, and the nested security layers',
+      },
+    ],
   },
   {
     slug: 'photo-gallery',
@@ -75,3 +101,5 @@ export const projects: Project[] = [
 ];
 
 export const getProject = (slug: string | undefined) => projects.find((p) => p.slug === slug);
+export const getDiagram = (project: Project | undefined, slug: string | undefined) =>
+  project?.diagrams?.find((d) => d.slug === slug);

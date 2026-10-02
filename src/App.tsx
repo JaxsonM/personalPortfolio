@@ -5,6 +5,7 @@ import SpotifyStats from './pages/SpotifyStats';
 import CallbackPage from './pages/CallbackPage';
 import SpotifyStatsDemo from './pages/SpotifyStatsDemo';
 import ProjectPage from './pages/ProjectPage';
+import DiagramPage from './pages/DiagramPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 const AppRouter: React.FC = () => {
@@ -18,6 +19,7 @@ const AppRouter: React.FC = () => {
         {/* The old all-projects page now lives on the homepage; keep old links working. */}
         <Route path="/projects" element={<Navigate to="/#projects" replace />} />
         <Route path="/projects/:slug" element={<ProjectPage />} />
+        <Route path="/projects/:slug/diagrams/:diagram" element={<DiagramPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>

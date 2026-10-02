@@ -1,0 +1,285 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 2740" width="720" height="2740" role="img" aria-labelledby="diagram-title diagram-desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif">
+  <title id="diagram-title">Inside the Minecraft Bedrock server container</title>
+  <desc id="diagram-desc">
+    The bedrock container, CT 105, is an unprivileged Debian 12 LXC on the Proxmox host with 4 cores, 4 GB
+    of RAM, a 32 GB disk, and CPU units set to 300. Inside it, bedrock.service starts bedrock_server on boot
+    as the limited minecraft user, restarts it on a crash, and stops it cleanly by sending stop. bedrock.socket
+    provides a FIFO at /run/bedrock.stdin as the server console's input, and journald collects the server's
+    output. Two systemd timers run every 5 minutes: cloudflare-ddns gets the public IP from api.ipify.org,
+    compares it with the DNS record through the Cloudflare API, patches the IP if it changed, and updates
+    server-udp-ports; bedrock-healthcheck restarts the server if TCP 19132 is not listening. Management
+    reaches the container through Cloudflare Access and Cloudflare Tunnel, which the cloudflared container
+    opens outbound, then the Proxmox web console. The router port forward carries game traffic only.
+    Security layers, outermost first: CyberSecure reputation blocking, only needed ports forwarded, Xbox Live
+    authentication, the allow-list, a limited service user, and an unprivileged container.
+  </desc>
+
+  <defs>
+    <!-- Arrowheads. The base sits at the end of the line and the tip extends past it,
+         so each line stops short of its target by the arrowhead's length. -->
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-blue-lg" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="20" markerHeight="20"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1d4ed8"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#d97706"/>
+    </marker>
+    <marker id="arrow-slate" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6b7280"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="720" height="2740" fill="#ffffff"/>
+
+  <!-- ============ INTERNET ============ -->
+  <g id="internet">
+    <text x="20" y="32" font-size="20" font-weight="600" fill="#6b7280" letter-spacing="2">INTERNET</text>
+  </g>
+
+  <!-- APIs the DDNS script calls (numbers match the steps inside the container) -->
+  <g id="apis">
+    <rect x="20" y="48" width="260" height="122" rx="12" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+    <text x="36" y="80" font-size="22" font-weight="700" fill="#111827">Cloudflare API</text>
+    <text x="74" y="115" font-size="20" fill="#4b5563">GET mc A record</text>
+    <text x="74" y="149" font-size="20" fill="#4b5563">PATCH the IP</text>
+
+    <rect x="110" y="196" width="190" height="80" rx="12" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+    <text x="126" y="226" font-size="20" font-weight="700" fill="#111827">api.ipify.org</text>
+    <text x="164" y="258" font-size="20" fill="#4b5563">public IP</text>
+  </g>
+
+  <!-- Players, shown only to contrast the port forward with the admin path -->
+  <g id="players">
+    <rect x="270" y="298" width="120" height="44" rx="10" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
+    <text x="330" y="327" font-size="20" font-weight="700" fill="#111827" text-anchor="middle">Players</text>
+  </g>
+
+  <!-- Admin browser and Cloudflare Zero Trust -->
+  <g id="admin">
+    <rect x="480" y="48" width="220" height="68" rx="12" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="590" y="90" font-size="22" font-weight="700" fill="#111827" text-anchor="middle">Admin browser</text>
+
+    <rect x="460" y="140" width="240" height="202" rx="16" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+    <!-- Left-aligned so the vertical tunnel line at x=610 doesn't cross it -->
+    <text x="476" y="168" font-size="20" font-weight="700" fill="#374151">Cloudflare</text>
+
+    <rect x="476" y="182" width="208" height="68" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="580" y="210" font-size="22" font-weight="700" fill="#111827" text-anchor="middle">Access</text>
+    <text x="580" y="236" font-size="20" fill="#6b7280" text-anchor="middle">identity check</text>
+
+    <rect x="476" y="276" width="208" height="50" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="580" y="308" font-size="22" font-weight="700" fill="#111827" text-anchor="middle">Tunnel</text>
+  </g>
+
+  <!-- ============ HOME NETWORK ============ -->
+  <g id="home-network">
+    <rect x="10" y="470" width="700" height="1602" rx="18" fill="#f3f4f6" stroke="#9ca3af" stroke-width="2"/>
+    <text x="420" y="502" font-size="22" font-weight="700" fill="#374151">Home network</text>
+
+    <!-- Gateway sits on the edge of the home network -->
+    <rect x="260" y="442" width="140" height="56" rx="12" fill="#ffffff" stroke="#6b7280" stroke-width="2"/>
+    <text x="330" y="478" font-size="20" font-weight="700" fill="#111827" text-anchor="middle">Gateway</text>
+  </g>
+
+  <!-- ============ PROXMOX VE HOST ============ -->
+  <!-- Headings start at x=346 so the slate (x=68), amber (x=330), and blue (x=610) lines don't cross them -->
+  <g id="proxmox-host">
+    <rect x="26" y="590" width="668" height="1466" rx="16" fill="#ffffff" stroke="#6b7280" stroke-width="2"/>
+    <text x="346" y="624" font-size="22" font-weight="700" fill="#111827">Proxmox VE 9.2 host</text>
+    <text x="346" y="650" font-size="20" fill="#6b7280">10.0.0.200</text>
+  </g>
+
+  <!-- ============ vmbr0: HOME NETWORK BRIDGE ============ -->
+  <g id="vmbr0">
+    <rect x="40" y="668" width="640" height="1372" rx="14" fill="#eff6ff" stroke="#bfdbfe" stroke-width="2"/>
+    <text x="346" y="698" font-size="20" font-weight="700" fill="#1d4ed8">vmbr0</text>
+    <text x="346" y="724" font-size="20" fill="#6b7280">home network bridge</text>
+
+    <!-- Management path: web console and cloudflared -->
+    <rect x="346" y="744" width="146" height="76" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="419" y="774" font-size="20" font-weight="700" fill="#111827" text-anchor="middle">Proxmox</text>
+    <text x="419" y="800" font-size="20" fill="#6b7280" text-anchor="middle">web console</text>
+
+    <rect x="522" y="744" width="146" height="76" rx="10" fill="#ffffff" stroke="#1d4ed8" stroke-width="3"/>
+    <text x="595" y="774" font-size="20" font-weight="700" fill="#111827" text-anchor="middle">cloudflared</text>
+    <text x="595" y="800" font-size="20" fill="#6b7280" text-anchor="middle">CT 102</text>
+  </g>
+
+  <!-- ============ CT 105: BEDROCK ============ -->
+  <g id="ct105">
+    <rect x="52" y="852" width="616" height="1172" rx="12" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="88" y="886" font-size="22" font-weight="700" fill="#111827">CT 105: bedrock</text>
+    <text x="88" y="914" font-size="20" fill="#4b5563">Debian 12 · unprivileged LXC · 10.0.0.202</text>
+    <text x="88" y="942" font-size="20" fill="#4b5563">4 cores · 4 GB RAM · 32 GB disk</text>
+    <text x="88" y="968" font-size="20" fill="#6b7280">CPU units 300: priority weight over other</text>
+    <text x="88" y="994" font-size="20" fill="#6b7280">guests when the CPU is busy</text>
+  </g>
+
+  <!-- systemd service, the server process, its console input, and its logs -->
+  <g id="server-process">
+    <rect x="88" y="1012" width="564" height="100" rx="10" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+    <text x="104" y="1042" font-size="20" fill="#6b7280"><tspan font-weight="700" fill="#111827">bedrock.service</tspan> (systemd)</text>
+    <text x="104" y="1070" font-size="20" fill="#4b5563">Starts on boot · restarts on crash</text>
+    <text x="104" y="1096" font-size="20" fill="#4b5563">Clean shutdown: sends "stop" to the console</text>
+
+    <rect x="88" y="1146" width="564" height="156" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="3"/>
+    <text x="104" y="1176" font-size="22" font-weight="700" fill="#111827">bedrock_server</text>
+    <text x="104" y="1204" font-size="20" fill="#4b5563">Runs as the limited minecraft user</text>
+    <text x="104" y="1230" font-size="20" fill="#4b5563">from /opt/bedrock</text>
+    <text x="104" y="1258" font-size="20" fill="#4b5563">Config: allowlist.json, server.properties</text>
+    <text x="104" y="1284" font-size="20" fill="#4b5563">LAN discovery: UDP 7551 (local network only)</text>
+
+    <rect x="88" y="1352" width="272" height="128" rx="10" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+    <text x="104" y="1382" font-size="20" font-weight="700" fill="#111827">bedrock.socket</text>
+    <text x="104" y="1410" font-size="20" fill="#4b5563">FIFO at</text>
+    <text x="104" y="1436" font-size="20" fill="#4b5563">/run/bedrock.stdin</text>
+    <text x="104" y="1462" font-size="20" fill="#4b5563">= console input</text>
+
+    <rect x="380" y="1352" width="272" height="128" rx="10" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+    <text x="396" y="1382" font-size="20" font-weight="700" fill="#111827">journald</text>
+    <text x="396" y="1410" font-size="20" fill="#4b5563">server output</text>
+    <text x="396" y="1436" font-size="20" fill="#4b5563">(stdout/stderr),</text>
+    <text x="396" y="1462" font-size="20" fill="#4b5563">read with journalctl</text>
+
+    <text x="88" y="1514" font-size="20" fill="#6b7280">Admin sends a console command with:</text>
+    <text x="88" y="1540" font-size="20" font-weight="700" fill="#111827">echo "command" &gt; /run/bedrock.stdin</text>
+  </g>
+
+  <!-- Local data flow inside the container -->
+  <g id="local-flow" stroke="#6b7280" stroke-width="2" fill="none">
+    <line x1="200" y1="1112" x2="200" y2="1132" marker-end="url(#arrow-gray)"/>
+    <line x1="224" y1="1352" x2="224" y2="1316" marker-end="url(#arrow-gray)"/>
+    <line x1="516" y1="1302" x2="516" y2="1338" marker-end="url(#arrow-gray)"/>
+  </g>
+  <text x="216" y="1136" font-size="20" fill="#6b7280">runs</text>
+  <text x="240" y="1334" font-size="20" fill="#6b7280">stdin</text>
+  <text x="504" y="1334" font-size="20" fill="#6b7280" text-anchor="end">stdout, stderr</text>
+
+  <!-- ============ AUTOMATION: systemd timers ============ -->
+  <g id="automation">
+    <text x="88" y="1590" font-size="20" font-weight="700" fill="#374151">Automation (systemd timers)</text>
+
+    <rect x="88" y="1606" width="564" height="256" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+    <text x="104" y="1636" font-size="20" fill="#6b7280"><tspan font-weight="700" fill="#111827">cloudflare-ddns.timer</tspan> every 5 min</text>
+    <text x="104" y="1662" font-size="20" fill="#6b7280">runs cloudflare-ddns.sh:</text>
+    <text x="146" y="1696" font-size="20" fill="#4b5563">Get the public IP from api.ipify.org</text>
+    <text x="146" y="1728" font-size="20" fill="#4b5563">GET the mc A record (Cloudflare API)</text>
+    <text x="146" y="1760" font-size="20" fill="#4b5563">If different, PATCH only the IP</text>
+    <text x="146" y="1786" font-size="20" fill="#6b7280">Token: DNS edit on sophisticants.com</text>
+    <text x="146" y="1812" font-size="20" fill="#6b7280">only, in a root-only env file</text>
+    <text x="146" y="1844" font-size="20" fill="#4b5563">Update server-udp-ports and restart</text>
+
+    <rect x="88" y="1878" width="564" height="128" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+    <text x="104" y="1908" font-size="20" fill="#6b7280"><tspan font-weight="700" fill="#111827">bedrock-healthcheck.timer</tspan> every 5 min</text>
+    <text x="104" y="1936" font-size="20" fill="#4b5563">If the service is running but TCP 19132 isn't</text>
+    <text x="104" y="1962" font-size="20" fill="#4b5563">listening, restart it. Added after the server</text>
+    <text x="104" y="1988" font-size="20" fill="#4b5563">once started "healthy" without opening its port.</text>
+  </g>
+
+  <!-- ============ CONNECTIONS ============ -->
+  <!-- Admin path: browser to Access to Tunnel -->
+  <g id="management-path" stroke="#2563eb" stroke-width="3" fill="none">
+    <line x1="610" y1="116" x2="610" y2="168" marker-end="url(#arrow-blue)"/>
+    <line x1="610" y1="250" x2="610" y2="262" marker-end="url(#arrow-blue)"/>
+    <!-- Inside the lab: cloudflared to the web console, then into the container's console -->
+    <line x1="522" y1="782" x2="506" y2="782" marker-end="url(#arrow-blue)"/>
+    <line x1="419" y1="820" x2="419" y2="838" marker-end="url(#arrow-blue)"/>
+  </g>
+
+  <!-- The key idea: cloudflared opens the tunnel OUTWARD to Cloudflare -->
+  <g id="outbound-tunnel">
+    <line x1="610" y1="744" x2="610" y2="346" stroke="#1d4ed8" stroke-width="5" marker-end="url(#arrow-blue-lg)"/>
+    <!-- Label pill drawn on top of the line -->
+    <rect x="430" y="364" width="260" height="62" rx="31" fill="#ffffff" stroke="#1d4ed8" stroke-width="2"/>
+    <text x="560" y="390" font-size="20" font-weight="700" fill="#1d4ed8" text-anchor="middle">Outbound tunnel</text>
+    <text x="560" y="414" font-size="20" fill="#4b5563" text-anchor="middle">(no inbound ports)</text>
+  </g>
+
+  <!-- The one inbound path: game traffic only, never management -->
+  <g id="port-forward" stroke="#d97706" stroke-width="3" stroke-dasharray="9 6" fill="none">
+    <line x1="330" y1="342" x2="330" y2="428" marker-end="url(#arrow-amber)"/>
+    <line x1="330" y1="498" x2="330" y2="838" marker-end="url(#arrow-amber)"/>
+  </g>
+  <text x="342" y="542" font-size="20" font-weight="700" fill="#b45309">Port forward:</text>
+  <text x="342" y="568" font-size="20" fill="#b45309">game traffic only</text>
+
+  <!-- DDNS script's outbound API calls -->
+  <g id="api-calls" stroke="#64748b" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round" fill="none">
+    <path d="M88,1700 H68 V184" marker-end="url(#arrow-slate)"/>
+    <path d="M68,236 H96" marker-end="url(#arrow-slate)"/>
+  </g>
+  <circle cx="68" cy="236" r="5" fill="#64748b"/>
+
+  <!-- Step badges: numbers match between the script and the APIs it calls -->
+  <g id="step-badges" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">
+    <circle cx="140" cy="252" r="15" fill="#64748b"/><text x="140" y="258">1</text>
+    <circle cx="50" cy="109" r="15" fill="#64748b"/><text x="50" y="115">2</text>
+    <circle cx="50" cy="143" r="15" fill="#64748b"/><text x="50" y="149">3</text>
+
+    <circle cx="122" cy="1690" r="15" fill="#64748b"/><text x="122" y="1696">1</text>
+    <circle cx="122" cy="1722" r="15" fill="#64748b"/><text x="122" y="1728">2</text>
+    <circle cx="122" cy="1754" r="15" fill="#64748b"/><text x="122" y="1760">3</text>
+    <circle cx="122" cy="1838" r="15" fill="#64748b"/><text x="122" y="1844">4</text>
+  </g>
+
+  <!-- ============ SECURITY LAYERS ============ -->
+  <!-- Each layer is drawn inside the one before it, outermost first -->
+  <g id="security-layers">
+    <text x="20" y="2134" font-size="20" font-weight="700" fill="#374151">Security layers, outermost first</text>
+
+    <rect x="20" y="2150" width="680" height="332" rx="14" fill="#fef2f2" stroke="#fca5a5" stroke-width="2"/>
+    <text x="36" y="2176" font-size="20" fill="#111827"><tspan font-weight="700">1</tspan>  CyberSecure reputation blocking</text>
+
+    <rect x="36" y="2188" width="648" height="284" rx="12" fill="#fffbeb" stroke="#fcd34d" stroke-width="2"/>
+    <text x="52" y="2214" font-size="20" fill="#111827"><tspan font-weight="700">2</tspan>  Only needed ports forwarded</text>
+
+    <rect x="52" y="2226" width="616" height="236" rx="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+    <text x="68" y="2252" font-size="20" fill="#111827"><tspan font-weight="700">3</tspan>  Xbox Live authentication</text>
+
+    <rect x="68" y="2264" width="584" height="188" rx="12" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
+    <text x="84" y="2290" font-size="20" fill="#111827"><tspan font-weight="700">4</tspan>  Allow-list</text>
+
+    <rect x="84" y="2302" width="552" height="140" rx="12" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+    <text x="100" y="2328" font-size="20" fill="#111827"><tspan font-weight="700">5</tspan>  Limited service user (minecraft)</text>
+
+    <rect x="100" y="2340" width="520" height="92" rx="12" fill="#eff6ff" stroke="#bfdbfe" stroke-width="2"/>
+    <text x="116" y="2366" font-size="20" fill="#111827"><tspan font-weight="700">6</tspan>  Unprivileged container</text>
+
+    <rect x="116" y="2378" width="488" height="44" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="360" y="2407" font-size="20" font-weight="700" fill="#111827" text-anchor="middle">bedrock_server</text>
+  </g>
+
+  <!-- ============ LEGEND ============ -->
+  <g id="legend">
+    <text x="20" y="2524" font-size="20" font-weight="700" fill="#374151">Legend</text>
+
+    <line x1="20" y1="2558" x2="62" y2="2558" stroke="#1d4ed8" stroke-width="5" marker-end="url(#arrow-blue-lg)"/>
+    <text x="100" y="2565" font-size="20" fill="#374151">Outbound tunnel (management)</text>
+
+    <line x1="20" y1="2596" x2="68" y2="2596" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)"/>
+    <text x="100" y="2603" font-size="20" fill="#374151">Admin path through the tunnel</text>
+
+    <line x1="20" y1="2634" x2="68" y2="2634" stroke="#d97706" stroke-width="3" stroke-dasharray="9 6"
+          marker-end="url(#arrow-amber)"/>
+    <text x="100" y="2641" font-size="20" fill="#374151">Inbound port forward (game traffic only)</text>
+
+    <line x1="20" y1="2672" x2="68" y2="2672" stroke="#64748b" stroke-width="3" stroke-dasharray="2 7"
+          stroke-linecap="round" marker-end="url(#arrow-slate)"/>
+    <text x="100" y="2679" font-size="20" fill="#374151">Automation API calls (outbound)</text>
+
+    <line x1="20" y1="2710" x2="68" y2="2710" stroke="#6b7280" stroke-width="2" marker-end="url(#arrow-gray)"/>
+    <text x="100" y="2717" font-size="20" fill="#374151">Data flow inside the container</text>
+  </g>
+</svg>
