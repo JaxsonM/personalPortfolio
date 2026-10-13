@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm';
 import PageShell from '../components/PageShell';
 import ZoomableImage from '../components/ZoomableImage';
 import { getStatusStyle } from '../components/statusStyles';
-import { getProject } from '../content/projects';
+import { getProject, getSubProjects } from '../content/projects';
 import NotFoundPage from './NotFoundPage';
 
 // Tailwind's reset strips default heading and list styles, so each Markdown element gets its own classes.
@@ -89,10 +89,17 @@ const ProjectPage: React.FC = () => {
 
   if (!project) return <NotFoundPage />;
 
+  // A sub-project has no homepage card, so its back link goes to the parent project instead.
+  const parent = getProject(project.parent);
+  const back = parent
+    ? { to: `/projects/${parent.slug}`, label: `← Back to ${parent.title}` }
+    : { to: '/#projects', label: '← Back to projects' };
+  const subProjects = getSubProjects(project);
+
   return (
     <PageShell>
       <article className="max-w-3xl mx-auto px-6 py-16">
-        <Link to="/#projects" className="text-sm text-gray-500 hover:text-gray-900">← Back to projects</Link>
+        <Link to={back.to} className="text-sm text-gray-500 hover:text-gray-900">{back.label}</Link>
         <div className="mt-6 mb-4">
           <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${getStatusStyle(project.status).badge}`}>
             {project.status}
@@ -105,10 +112,29 @@ const ProjectPage: React.FC = () => {
           ))}
         </div>
 
+        {subProjects.length > 0 && (
+          <div className="mt-10">
+            <p className="text-sm font-medium text-gray-500 mb-3">Part of this project</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {subProjects.map((sub) => (
+                <Link key={sub.slug} to={`/projects/${sub.slug}`}
+                  className="group flex flex-col border border-gray-200 rounded-2xl p-5 hover:border-gray-300 hover:shadow-lg transition-all duration-200">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <h2 className="font-semibold">{sub.title}</h2>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${getStatusStyle(sub.status).badge}`}>{sub.status}</span>
+                  </div>
+                  <p className="text-gray-500 text-sm leading-relaxed mb-4 flex-1">{sub.summary}</p>
+                  <span className="text-sm font-medium text-blue-600 group-hover:text-blue-800">Read the write-up →</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         {failed && (
           <div className="mt-12 border border-gray-200 bg-gray-50 rounded-2xl p-6">
             <p className="text-gray-600 mb-3">Sorry, this write-up couldn't be loaded. Please try again later.</p>
-            <Link to="/#projects" className="text-sm font-medium text-blue-600 hover:text-blue-800">← Back to projects</Link>
+            <Link to={back.to} className="text-sm font-medium text-blue-600 hover:text-blue-800">{back.label}</Link>
           </div>
         )}
         {!failed && markdown === null && <p className="text-gray-400 mt-12">Loading…</p>}

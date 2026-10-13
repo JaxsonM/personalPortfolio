@@ -5,7 +5,8 @@ import { getStatusStyle } from '../components/statusStyles';
 import { projects } from '../content/projects';
 
 const featuredProject = projects.find((p) => p.featured);
-const otherProjects = projects.filter((p) => !p.featured);
+// Sub-projects are linked from their parent's page instead of getting their own card.
+const otherProjects = projects.filter((p) => !p.featured && !p.parent);
 const resumeUrl = '/Jaxson-Madison-Resume.pdf';
 
 const HomePage: React.FC = () => {

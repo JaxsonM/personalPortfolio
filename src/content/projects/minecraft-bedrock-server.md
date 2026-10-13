@@ -2,6 +2,8 @@
 
 A dedicated Minecraft Bedrock server for about six friends who play on consoles and PC. It started as a game server and turned into one of my best exercises in Linux services, networking, DNS, and automation, because it has real users who notice immediately when something breaks.
 
+This page covers the server itself. Two later additions have their own write-ups: a [live world map](/projects/minecraft-world-map) that also handles world backups, and a [status dashboard](/projects/minecraft-server-dashboard) built on Prometheus and Grafana.
+
 ## At a glance
 
 | Component | Details |
@@ -100,7 +102,6 @@ The lesson: a router doesn't really know devices by name or IP address. It knows
 
 ## What's next
 
-- **Backups:** scheduled Proxmox backups of the container, with a tested restore.
-- **A public status page:** connected players, server health, and a world map, published through my Cloudflare Tunnel.
+- **Container backups:** the world itself is backed up every 6 hours by the [world map pipeline](/projects/minecraft-world-map). Scheduled Proxmox backups of the whole container, with a tested restore, are still to do.
 - **Firewall rules:** a default-deny Proxmox firewall on the container, allowing only the game ports.
 - **Publish the DDNS script** on GitHub, with the token kept out of the repo.

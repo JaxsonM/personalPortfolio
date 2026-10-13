@@ -3,6 +3,8 @@ import proxmoxHomeLab from './proxmox-home-lab.md';
 import windowsAdLab from './windows-ad-lab.md';
 import azureEntraIdLabs from './azure-entra-id-labs.md';
 import minecraftBedrockServer from './minecraft-bedrock-server.md';
+import minecraftWorldMap from './minecraft-world-map.md';
+import minecraftServerDashboard from './minecraft-server-dashboard.md';
 import photoGallery from './photo-gallery.md';
 import browserDevEnvironment from './browser-dev-environment.md';
 import portfolioSite from './portfolio-site.md';
@@ -25,6 +27,7 @@ export interface Project {
   featured?: boolean;
   content: string; // URL of the bundled .md file
   diagrams?: Diagram[];
+  parent?: string; // slug of the project this one is part of; sub-projects get no homepage card
 }
 
 export const projects: Project[] = [
@@ -60,7 +63,7 @@ export const projects: Project[] = [
     slug: 'minecraft-bedrock-server',
     title: 'Minecraft Bedrock Server',
     summary:
-      'A dedicated server for friends on Xbox and PC, running as a systemd service in an LXC container, with my own Bash DDNS updater keeping its DNS record current.',
+      'A dedicated server for friends on Xbox and PC, running as a systemd service in an LXC container, with my own Bash DDNS updater keeping its DNS record current. It now has a live world map with automated backups and a Prometheus and Grafana status dashboard.',
     tags: ['Debian', 'LXC', 'systemd', 'Bash', 'Cloudflare API', 'DNS'],
     status: 'Complete',
     content: minecraftBedrockServer,
@@ -80,6 +83,26 @@ export const projects: Project[] = [
         alt: 'Diagram of the Bedrock container showing the systemd service, console pipe and journald, the DDNS and health check timers with their API calls, the outbound Cloudflare Tunnel admin path, and the nested security layers',
       },
     ],
+  },
+  {
+    slug: 'minecraft-world-map',
+    title: 'Live World Map and Backups',
+    summary:
+      'A public, zoomable map of the world, rendered hourly from consistent snapshots of the live server, with live player positions and tiered world backups every 6 hours.',
+    tags: ['uNmINeD', 'Bash', 'systemd timers', 'Caddy', 'Cloudflare Tunnel', 'Proxmox VE'],
+    status: 'In Progress',
+    content: minecraftWorldMap,
+    parent: 'minecraft-bedrock-server',
+  },
+  {
+    slug: 'minecraft-server-dashboard',
+    title: 'Server Status Dashboard',
+    summary:
+      'A public Prometheus and Grafana dashboard showing who\'s online, all-time playtime, and server health, plus Discord notifications when a player joins.',
+    tags: ['Prometheus', 'Grafana', 'node_exporter', 'blackbox_exporter', 'Bash', 'Cloudflare Access'],
+    status: 'In Progress',
+    content: minecraftServerDashboard,
+    parent: 'minecraft-bedrock-server',
   },
   {
     slug: 'photo-gallery',
@@ -111,5 +134,6 @@ export const projects: Project[] = [
 ];
 
 export const getProject = (slug: string | undefined) => projects.find((p) => p.slug === slug);
+export const getSubProjects = (project: Project) => projects.filter((p) => p.parent === project.slug);
 export const getDiagram = (project: Project | undefined, slug: string | undefined) =>
   project?.diagrams?.find((d) => d.slug === slug);
