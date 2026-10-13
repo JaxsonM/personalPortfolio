@@ -13,7 +13,7 @@ This page covers the server itself. Two later additions have their own write-ups
 | **Service** | systemd service running as a dedicated non-root user |
 | **Networking** | Router port forward: one TCP port for connections, a narrow UDP range for gameplay |
 | **DNS** | A domain on Cloudflare, kept current by my own Bash DDNS updater |
-| **Automation** | Two systemd timers: DNS updates and a health check |
+| **Automation** | Two systemd timers: DNS updates and a health check, plus the monitoring scripts covered in the [status dashboard](/projects/minecraft-server-dashboard) write-up |
 | **Players** | About six friends on Xbox, Switch, and PC |
 
 ## Diagrams
@@ -48,6 +48,10 @@ My home IP address can change at any time, which would break that record. So I w
 
 ## What broke and how I fixed it
 
+### The guides were out of date
+
+The setup guides I found said Bedrock's default network transport was RakNet. The server's own log said otherwise: NetherNet was the only supported transport. The guides described older versions of the server. From then on, I treated the server's log as the source of truth and secondhand guides as hints.
+
 ### Outside players couldn't connect
 
 Friends on my home network could join, but anyone outside got stuck on "Locating server" and then a connection error, even though the DNS record and port forward were both correct.
@@ -68,6 +72,12 @@ The fix was a server setting that controls which address it advertises for gamep
 That tells the server: "Tell players to reach me at my public IP on these UDP ports, which map to these same ports on my side." The router's port forward carries the traffic the rest of the way. As soon as I made the change, outside friends could connect.
 
 The fix also created a new problem. My public IP was now hardcoded in the server's config, so if it ever changed, the DNS record would update but the server would keep advertising the old address, and outside players would break without any error on my end. I extended my DDNS script to update that setting too and restart the server whenever the IP changes, so the two can't drift apart.
+
+### A failing test that wasn't testing the server
+
+After the UDP fix, my own test from outside my home network kept failing, which made it look like the fix hadn't worked. Meanwhile, a friend connected fine. The network I was testing from blocked the game's UDP traffic, so my test could never have succeeded, no matter what the server did.
+
+A failed test only tells you something if the path the test takes is trustworthy.
 
 ### A server that looked healthy but wasn't
 
@@ -94,6 +104,8 @@ Setting up the port forward turned into a lesson in how routers identify devices
 The lesson: a router doesn't really know devices by name or IP address. It knows them by MAC address, and everything else is attached to that. When a port forward doesn't work, checking that the container, the reservation, and the forward all point at the same address is one of the first things I look at now.
 
 ## Security decisions
+
+These aren't hypothetical. The same evening I opened the game port, my router's security feature (Xfinity's CyberSecure) started logging blocked connection attempts against it, in bursts from the same blocks of addresses. Any open port on the internet gets found and probed quickly, so every layer below assumes someone is already knocking.
 
 - **Allow-list:** only players I've added by name can join, so anyone who finds the server can't actually get in.
 - **Xbox account sign-in:** every player has to authenticate with a Microsoft account.

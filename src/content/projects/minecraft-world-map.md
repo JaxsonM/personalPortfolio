@@ -88,8 +88,6 @@ That's about 30 copies, at roughly 140MB each. The cleanup only deletes files th
 
 The backups live on a different physical drive (NVMe) than the live world (SSD), so a single drive failure can't take out both. They don't protect against losing the whole host, which is why an offsite copy is on my to-do list.
 
-**TODO:** test a restore from one of these backups and write it up. A backup you've never restored is a hope, not a backup.
-
 ## What broke and how I fixed it
 
 ### "Save hold" doesn't freeze everything

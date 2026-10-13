@@ -63,7 +63,7 @@ export const projects: Project[] = [
     slug: 'minecraft-bedrock-server',
     title: 'Minecraft Bedrock Server',
     summary:
-      'A dedicated server for friends on Xbox and PC, running as a systemd service in an LXC container, with my own Bash DDNS updater keeping its DNS record current. It now has a live world map with automated backups and a Prometheus and Grafana status dashboard.',
+      'A dedicated server for friends on Xbox, Switch, and PC, running as a systemd service in an LXC container, with my own Bash DDNS updater keeping its DNS record current.',
     tags: ['Debian', 'LXC', 'systemd', 'Bash', 'Cloudflare API', 'DNS'],
     status: 'Complete',
     content: minecraftBedrockServer,

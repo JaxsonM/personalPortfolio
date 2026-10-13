@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import SiteFooter from '../components/SiteFooter';
 import { getStatusStyle } from '../components/statusStyles';
-import { projects } from '../content/projects';
+import { getSubProjects, projects } from '../content/projects';
 
 const featuredProject = projects.find((p) => p.featured);
 // Sub-projects are linked from their parent's page instead of getting their own card.
@@ -188,7 +188,9 @@ const HomePage: React.FC = () => {
 
           {/* Other projects */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-            {otherProjects.map((project) => (
+            {otherProjects.map((project) => {
+              const subProjects = getSubProjects(project);
+              return (
               <Link key={project.slug} to={`/projects/${project.slug}`}
                 className="group flex flex-col border border-gray-200 rounded-2xl p-6 hover:border-gray-300 hover:shadow-lg transition-all duration-200">
                 <div className="flex items-start justify-between gap-3 mb-2">
@@ -196,9 +198,23 @@ const HomePage: React.FC = () => {
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${getStatusStyle(project.status).badge}`}>{project.status}</span>
                 </div>
                 <p className="text-gray-500 text-sm leading-relaxed mb-4 flex-1">{project.summary}</p>
-                <span className="text-sm font-medium text-blue-600 group-hover:text-blue-800">Read the write-up →</span>
+                {/* Plain text, not links: the whole card is already a link, and links can't be nested. */}
+                {subProjects.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Also includes</p>
+                    <ul className="space-y-1">
+                      {subProjects.map((sub) => (
+                        <li key={sub.slug} className="text-sm text-gray-700">{sub.title}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <span className="text-sm font-medium text-blue-600 group-hover:text-blue-800">
+                  {subProjects.length > 0 ? 'Read the write-ups →' : 'Read the write-up →'}
+                </span>
               </Link>
-            ))}
+              );
+            })}
           </div>
 
         </div>
