@@ -83,8 +83,6 @@ The watcher doesn't run as root. It has its own limited user, which gets permiss
 
 Each message is a green dot, the player's gamertag, and "joined the server." The script builds the message as JSON with `jq`, which handles escaping properly, and turns off Discord's mention parsing, so nothing in a message can ever ping the whole server.
 
-**TODO:** add a screenshot of a join message.
-
 ## What broke and how I fixed it
 
 ### The 17 hour session that was really 13 minutes
