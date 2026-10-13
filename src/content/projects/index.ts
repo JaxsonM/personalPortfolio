@@ -1,6 +1,7 @@
 // Card details for each project. The write-up itself lives in the matching .md file.
 import proxmoxHomeLab from './proxmox-home-lab.md';
 import windowsAdLab from './windows-ad-lab.md';
+import azureEntraIdLabs from './azure-entra-id-labs.md';
 import minecraftBedrockServer from './minecraft-bedrock-server.md';
 import photoGallery from './photo-gallery.md';
 import browserDevEnvironment from './browser-dev-environment.md';
@@ -45,6 +46,15 @@ export const projects: Project[] = [
     tags: ['Windows Server', 'Active Directory', 'Proxmox VE'],
     status: 'In Progress',
     content: windowsAdLab,
+  },
+  {
+    slug: 'azure-entra-id-labs',
+    title: 'Azure Labs Part 1: Entra ID Users, Groups, and Roles',
+    summary:
+      'Hands-on AZ-104 labs in my own Azure tenant: bulk user imports, nested and dynamic groups, delegated admin roles, guest access, and managing it all from PowerShell.',
+    tags: ['Microsoft Entra ID', 'Azure', 'Azure RBAC', 'PowerShell', 'Az module'],
+    status: 'In Progress',
+    content: azureEntraIdLabs,
   },
   {
     slug: 'minecraft-bedrock-server',
