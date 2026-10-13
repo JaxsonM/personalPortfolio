@@ -1,0 +1,201 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 2210" width="720" height="2210" role="img" aria-labelledby="diagram-title diagram-desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif">
+  <title id="diagram-title">How the Minecraft world map updates</title>
+  <desc id="diagram-desc">
+    Two systemd timers on the Proxmox host drive the map. Every hour, map-sync runs bedrock-snapshot.sh in the
+    bedrock container (CT 105), which sends save hold and save query to the server console, copies the world,
+    sends save resume, trims each file to the length the server listed, and packs a tar archive. The host pulls
+    the archive, verifies its SHA-256 checksum, and pushes it to the map container (CT 108), where map-update.sh
+    unpacks and checks it, swaps it in, keeps a backup at 0, 6, 12 and 18 hours, prunes old backups, renders the
+    map with uNmINeD, and re-applies the page title, favicon and live markers script. Every minute, map-players
+    runs bedrock-positions.sh, which asks the console for the online players with list and for each player's
+    position with querytarget, and pipes the JSON to map-markers.sh, which writes the marker files. Caddy serves
+    only the web folder. Visitors reach it through Cloudflare and the outbound tunnel from the cloudflared
+    container (CT 102), so no inbound ports are open, and each open page refreshes its markers every 30 seconds.
+  </desc>
+
+  <defs>
+    <!-- Arrowheads. The base sits at the end of the line and the tip extends past it,
+         so each line stops short of its target by the arrowhead's length. -->
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-violet" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/>
+    </marker>
+    <marker id="arrow-tunnel" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="20" markerHeight="20"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1d4ed8"/>
+    </marker>
+    <marker id="arrow-gray" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6b7280"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="720" height="2210" fill="#ffffff"/>
+
+  <!-- ============ INTERNET ============ -->
+<text x="20" y="32" font-size="20" font-weight="600" fill="#6b7280" letter-spacing="2">INTERNET</text>
+<rect x="20" y="48" width="300" height="120" rx="12" fill="#ffffff" stroke="#c4b5fd" stroke-width="2"/>
+<text x="36" y="82" font-size="22" font-weight="700" fill="#111827">Visitors</text>
+<text x="36" y="114" font-size="20" fill="#4b5563">Load the map and tiles</text>
+<text x="36" y="144" font-size="20" fill="#4b5563">Markers every 30 s</text>
+<rect x="420" y="48" width="280" height="120" rx="12" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+<text x="436" y="82" font-size="22" font-weight="700" fill="#111827">Cloudflare</text>
+<text x="436" y="114" font-size="20" fill="#4b5563">HTTPS · edge cache</text>
+<text x="436" y="144" font-size="20" fill="#4b5563">Access bypass: public</text>
+
+  <!-- ============ HOME NETWORK ============ -->
+<rect x="10" y="230" width="700" height="1710" rx="18" fill="#f3f4f6" stroke="#9ca3af" stroke-width="2"/>
+<text x="36" y="264" font-size="22" font-weight="700" fill="#374151">Home network</text>
+<rect x="26" y="280" width="668" height="1644" rx="16" fill="#ffffff" stroke="#6b7280" stroke-width="2"/>
+<text x="52" y="318" font-size="22" font-weight="700" fill="#111827">Proxmox VE host (pve)</text>
+<rect x="480" y="300" width="188" height="76" rx="10" fill="#ffffff" stroke="#1d4ed8" stroke-width="3"/>
+<text x="574" y="330" font-size="20" font-weight="700" fill="#111827" text-anchor="middle">cloudflared</text>
+<text x="574" y="356" font-size="20" fill="#6b7280" text-anchor="middle">CT 102</text>
+
+  <!-- ============ CT 105: BEDROCK ============ -->
+<rect x="52" y="400" width="576" height="524" rx="12" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+<text x="72" y="434" font-size="22" font-weight="700" fill="#111827">CT 105: bedrock</text>
+<text x="72" y="462" font-size="20" fill="#4b5563">Bedrock Dedicated Server</text>
+<rect x="72" y="480" width="536" height="86" rx="10" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+<text x="88" y="512" font-size="20" font-weight="700" fill="#111827">bedrock_server</text>
+<text x="88" y="546" font-size="20" fill="#4b5563">Console in: FIFO · out: journald</text>
+<rect x="72" y="612" width="258" height="292" rx="10" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<text x="88" y="642" font-size="20" font-weight="700" fill="#111827">bedrock-snapshot.sh</text>
+<circle cx="100" cy="671" r="13" fill="#2563eb"/><text x="100" y="677" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+<text x="122" y="678" font-size="20" fill="#4b5563">save hold</text>
+<circle cx="100" cy="701" r="13" fill="#2563eb"/><text x="100" y="707" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
+<text x="122" y="708" font-size="20" fill="#4b5563">save query</text>
+<circle cx="100" cy="731" r="13" fill="#2563eb"/><text x="100" y="737" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+<text x="122" y="738" font-size="20" fill="#4b5563">copy the world</text>
+<circle cx="100" cy="761" r="13" fill="#2563eb"/><text x="100" y="767" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+<text x="122" y="768" font-size="20" fill="#4b5563">save resume</text>
+<circle cx="100" cy="791" r="13" fill="#2563eb"/><text x="100" y="797" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">5</text>
+<text x="122" y="798" font-size="20" fill="#4b5563">trim to listed</text>
+<text x="122" y="822" font-size="20" fill="#4b5563">lengths</text>
+<circle cx="100" cy="845" r="13" fill="#2563eb"/><text x="100" y="851" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">6</text>
+<text x="122" y="852" font-size="20" fill="#4b5563">pack a .tar</text>
+<text x="88" y="886" font-size="20" fill="#6b7280">trap: always resumes</text>
+<rect x="350" y="612" width="258" height="292" rx="10" fill="#ffffff" stroke="#059669" stroke-width="2"/>
+<text x="366" y="642" font-size="20" font-weight="700" fill="#111827">bedrock-positions.sh</text>
+<circle cx="378" cy="671" r="13" fill="#059669"/><text x="378" y="677" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+<text x="400" y="678" font-size="20" fill="#4b5563">list: who's online</text>
+<circle cx="378" cy="701" r="13" fill="#059669"/><text x="378" y="707" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
+<text x="400" y="708" font-size="20" fill="#4b5563">querytarget, once</text>
+<text x="400" y="732" font-size="20" fill="#4b5563">per gamertag</text>
+<circle cx="378" cy="755" r="13" fill="#059669"/><text x="378" y="761" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+<text x="400" y="762" font-size="20" fill="#4b5563">print JSON:</text>
+<text x="400" y="786" font-size="20" fill="#4b5563">name, x, y, z, dim</text>
+<text x="366" y="852" font-size="20" fill="#6b7280">asks by name, since</text>
+<text x="366" y="878" font-size="20" fill="#6b7280">IDs carry no names</text>
+  <g stroke="#6b7280" stroke-width="2" fill="none"><line x1="201" y1="612" x2="201" y2="580" marker-end="url(#arrow-gray)"/><line x1="479" y1="612" x2="479" y2="580" marker-end="url(#arrow-gray)"/></g>
+<text x="340" y="600" font-size="18" fill="#6b7280" text-anchor="middle">console commands</text>
+
+  <!-- ============ HOST TIMERS ============ -->
+  <!-- The host only moves data; the Minecraft logic stays inside the containers -->
+<rect x="52" y="980" width="576" height="200" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+<text x="72" y="1014" font-size="20" font-weight="700" fill="#374151">Host timers</text>
+<text x="72" y="1048" font-size="20" fill="#2563eb" font-weight="700">map-sync.timer</text>
+<text x="72" y="1076" font-size="20" fill="#4b5563">hourly, at :00</text>
+<text x="72" y="1104" font-size="20" fill="#4b5563">pull, verify SHA-256,</text>
+<text x="72" y="1130" font-size="20" fill="#4b5563">push to map</text>
+<text x="350" y="1048" font-size="20" fill="#059669" font-weight="700">map-players.timer</text>
+<text x="350" y="1076" font-size="20" fill="#4b5563">every minute</text>
+<text x="350" y="1104" font-size="20" fill="#4b5563">pipe the JSON</text>
+<text x="350" y="1130" font-size="20" fill="#6b7280">(no task log entries)</text>
+<text x="72" y="1164" font-size="20" fill="#6b7280">Runs each step with pct exec; no game logic</text>
+
+  <!-- ============ CT 108: MAP ============ -->
+<rect x="52" y="1236" width="576" height="668" rx="12" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+<text x="130" y="1270" font-size="22" font-weight="700" fill="#111827">CT 108: map</text>
+<text x="130" y="1298" font-size="20" fill="#4b5563">50 GB volume on NVMe</text>
+<rect x="72" y="1330" width="258" height="284" rx="10" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+<text x="88" y="1360" font-size="20" font-weight="700" fill="#111827">map-update.sh</text>
+<circle cx="100" cy="1389" r="13" fill="#2563eb"/><text x="100" y="1395" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">1</text>
+<text x="122" y="1396" font-size="20" fill="#4b5563">unpack, check</text>
+<circle cx="100" cy="1419" r="13" fill="#2563eb"/><text x="100" y="1425" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">2</text>
+<text x="122" y="1426" font-size="20" fill="#4b5563">swap world in</text>
+<circle cx="100" cy="1449" r="13" fill="#2563eb"/><text x="100" y="1455" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">3</text>
+<text x="122" y="1456" font-size="20" fill="#4b5563">keep backup at</text>
+<text x="122" y="1480" font-size="20" fill="#4b5563">0, 6, 12, 18 h</text>
+<circle cx="100" cy="1503" r="13" fill="#2563eb"/><text x="100" y="1509" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
+<text x="122" y="1510" font-size="20" fill="#4b5563">prune old ones</text>
+<circle cx="100" cy="1533" r="13" fill="#2563eb"/><text x="100" y="1539" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">5</text>
+<text x="122" y="1540" font-size="20" fill="#4b5563">render (uNmINeD)</text>
+<circle cx="100" cy="1563" r="13" fill="#2563eb"/><text x="100" y="1569" font-size="16" font-weight="700" fill="#ffffff" text-anchor="middle">6</text>
+<text x="122" y="1570" font-size="20" fill="#4b5563">re-apply title,</text>
+<text x="122" y="1594" font-size="20" fill="#4b5563">favicon, markers</text>
+<rect x="350" y="1330" width="258" height="284" rx="10" fill="#ffffff" stroke="#059669" stroke-width="2"/>
+<text x="366" y="1360" font-size="20" font-weight="700" fill="#111827">map-markers.sh</text>
+<text x="366" y="1396" font-size="20" fill="#4b5563">players.json</text>
+<text x="366" y="1420" font-size="20" fill="#4b5563">+ Spawn + colors</text>
+<text x="366" y="1450" font-size="20" fill="#4b5563">writes the marker</text>
+<text x="366" y="1474" font-size="20" fill="#4b5563">files (.js, .json)</text>
+<text x="366" y="1510" font-size="20" fill="#6b7280">ignores data older</text>
+<text x="366" y="1534" font-size="20" fill="#6b7280">than 5 minutes</text>
+<rect x="72" y="1660" width="258" height="76" rx="10" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+<text x="88" y="1690" font-size="20" font-weight="700" fill="#111827">backups/</text>
+<text x="88" y="1718" font-size="20" fill="#6b7280">about 30, tiered</text>
+<rect x="350" y="1660" width="258" height="76" rx="10" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+<text x="366" y="1690" font-size="20" font-weight="700" fill="#111827">web/</text>
+<text x="366" y="1718" font-size="20" fill="#6b7280">tiles + markers</text>
+  <g stroke="#6b7280" stroke-width="2" fill="none">
+    <line x1="150" y1="1614" x2="150" y2="1646" marker-end="url(#arrow-gray)"/>
+    <path d="M300,1614 V1636 H430 V1646" marker-end="url(#arrow-gray)"/>
+    <line x1="530" y1="1614" x2="530" y2="1646" marker-end="url(#arrow-gray)"/>
+    <line x1="479" y1="1736" x2="479" y2="1756" marker-end="url(#arrow-gray)"/>
+  </g>
+<rect x="72" y="1770" width="536" height="110" rx="10" fill="#ffffff" stroke="#7c3aed" stroke-width="3"/>
+<text x="88" y="1802" font-size="22" font-weight="700" fill="#111827">Caddy :80</text>
+<text x="88" y="1832" font-size="20" fill="#4b5563">serves only web/ · cache rules</text>
+<text x="88" y="1860" font-size="20" fill="#6b7280">HTTP from cloudflared</text>
+
+  <!-- ============ CONNECTIONS ============ -->
+  <!-- Hourly world pipeline -->
+  <g stroke="#2563eb" stroke-width="3" fill="none">
+    <line x1="110" y1="904" x2="110" y2="966" marker-end="url(#arrow-blue)"/>
+    <line x1="110" y1="1180" x2="110" y2="1316" marker-end="url(#arrow-blue)"/>
+  </g>
+<text x="122" y="952" font-size="20" font-weight="700" fill="#2563eb">world .tar</text>
+<text x="122" y="1214" font-size="20" font-weight="700" fill="#2563eb">.tar + checksum</text>
+  <!-- Every-minute player positions -->
+  <g stroke="#059669" stroke-width="3" stroke-dasharray="9 6" fill="none">
+    <line x1="570" y1="904" x2="570" y2="966" marker-end="url(#arrow-green)"/>
+    <line x1="570" y1="1180" x2="570" y2="1316" marker-end="url(#arrow-green)"/>
+  </g>
+<text x="558" y="952" font-size="20" font-weight="700" fill="#059669" text-anchor="end">JSON</text>
+<text x="558" y="1214" font-size="20" font-weight="700" fill="#059669" text-anchor="end">pipe</text>
+  <!-- Web requests: Cloudflare to visitors, and cloudflared to Caddy over the LAN -->
+  <g stroke="#7c3aed" stroke-width="3" fill="none">
+    <line x1="420" y1="108" x2="334" y2="108" marker-end="url(#arrow-violet)"/>
+    <path d="M650,376 V1825 H622" marker-end="url(#arrow-violet)"/>
+  </g>
+<text x="377" y="96" font-size="20" font-weight="700" fill="#7c3aed" text-anchor="middle">HTTPS</text>
+  <!-- cloudflared opens the tunnel OUTWARD to Cloudflare -->
+  <line x1="574" y1="300" x2="574" y2="188" stroke="#1d4ed8" stroke-width="5" marker-end="url(#arrow-tunnel)"/>
+  <rect x="454" y="196" width="240" height="58" rx="29" fill="#ffffff" stroke="#1d4ed8" stroke-width="2"/>
+<text x="574" y="221" font-size="20" font-weight="700" fill="#1d4ed8" text-anchor="middle">Outbound tunnel</text>
+<text x="574" y="245" font-size="20" fill="#4b5563" text-anchor="middle">(no inbound ports)</text>
+
+  <!-- ============ LEGEND ============ -->
+<text x="20" y="1990" font-size="20" font-weight="700" fill="#374151">Legend</text>
+  <line x1="20" y1="2024" x2="68" y2="2024" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)"/>
+<text x="100" y="2031" font-size="20" fill="#374151">Hourly world pipeline (map-sync)</text>
+  <line x1="20" y1="2062" x2="68" y2="2062" stroke="#059669" stroke-width="3" stroke-dasharray="9 6" marker-end="url(#arrow-green)"/>
+<text x="100" y="2069" font-size="20" fill="#374151">Player positions every minute (map-players)</text>
+  <line x1="20" y1="2100" x2="68" y2="2100" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrow-violet)"/>
+<text x="100" y="2107" font-size="20" fill="#374151">Web requests</text>
+  <line x1="20" y1="2138" x2="62" y2="2138" stroke="#1d4ed8" stroke-width="5" marker-end="url(#arrow-tunnel)"/>
+<text x="100" y="2145" font-size="20" fill="#374151">Outbound tunnel (no inbound ports)</text>
+  <line x1="20" y1="2176" x2="68" y2="2176" stroke="#6b7280" stroke-width="2" marker-end="url(#arrow-gray)"/>
+<text x="100" y="2183" font-size="20" fill="#374151">Console commands and file writes</text>
+</svg>

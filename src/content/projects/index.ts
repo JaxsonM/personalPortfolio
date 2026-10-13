@@ -93,6 +93,15 @@ export const projects: Project[] = [
     status: 'In Progress',
     content: minecraftWorldMap,
     parent: 'minecraft-bedrock-server',
+    diagrams: [
+      {
+        slug: 'pipeline',
+        title: 'How the map updates',
+        description: 'The hourly snapshot and render pipeline across three machines, the every-minute player position loop, and how visitors reach the map.',
+        src: '/images/minecraft-map-pipeline-diagram.svg',
+        alt: 'Diagram of the world map pipeline: host timers run a snapshot script in the game server container that holds saves, copies and trims the world, and packs an archive, which the host verifies and pushes to the map container to unpack, back up, render and serve with Caddy; a second timer pipes player positions from the game server console to a marker script every minute; visitors reach Caddy through Cloudflare and an outbound Cloudflare Tunnel',
+      },
+    ],
   },
   {
     slug: 'minecraft-server-dashboard',

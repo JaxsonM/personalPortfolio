@@ -21,7 +21,7 @@ Bedrock has no plugin system, so there's no off-the-shelf "live map" to install.
 
 ## Diagrams
 
-**TODO:** add a pipeline diagram here: the hourly snapshot to render flow across the three machines, and the every-minute player loop.
+- [How the map updates](/projects/minecraft-world-map/diagrams/pipeline): the hourly snapshot and render pipeline across three machines, the every-minute player position loop, and how visitors reach the map
 
 ## How it works
 
