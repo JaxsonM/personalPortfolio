@@ -19,7 +19,9 @@ It's part of my [Minecraft Bedrock server](/projects/minecraft-bedrock-server) p
 
 ## Diagrams
 
-**TODO:** add a diagram here: the Prometheus exporters, Grafana, and the path from the server log to the dashboard and Discord.
+- [How the dashboard gets its data](/projects/minecraft-server-dashboard/diagrams/data-flow): the visitor path through Cloudflare, the Prometheus scrapes, the server log readers, the two port probes, and the Discord webhook
+
+To keep the diagram readable, it leaves out two scrape targets: Prometheus scraping itself, and the monitoring container's own node_exporter. Both are listed in the table below.
 
 ## How it's built
 
@@ -34,6 +36,8 @@ Prometheus works by **scraping**: every few seconds it visits a list of small we
 | **node_exporter** on the game server | Memory, disk and network inside the container, plus my custom player metrics (below) |
 | **prometheus-pve-exporter** | CPU per container, read from the Proxmox API with a read-only token |
 | **blackbox_exporter** | Whether the game port answers, tested two ways (below) |
+
+The first two only watch the monitoring stack itself, so the diagram leaves them out.
 
 The Proxmox exporter is a Python program, installed into its own virtual environment so its packages can't conflict with the system's. It runs as a dedicated limited user and only listens on the monitoring container's loopback address.
 

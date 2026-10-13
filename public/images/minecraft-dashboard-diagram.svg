@@ -1,0 +1,252 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1560" width="720" height="1560" role="img" aria-labelledby="diagram-title diagram-desc"
+     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif">
+  <title id="diagram-title">Minecraft server dashboard data flow</title>
+  <desc id="diagram-desc">
+    Friends open the status page through Cloudflare Access, which bypasses login for the public dashboard paths,
+    and Cloudflare Tunnel, which the cloudflared container opens outbound. The tunnel reaches Grafana in the
+    monitoring container. Grafana queries Prometheus, which scrapes every 15 seconds: blackbox_exporter and the
+    Proxmox exporter on localhost, and node_exporter on the game server container. Inside the game server container,
+    the server writes join and leave lines to the systemd journal. Three things read the journal: a Discord watcher
+    that posts joins through a webhook, a player script every 15 seconds, and a playtime script every minute.
+    The two scripts write metric files that node_exporter publishes through its textfile collector. The Proxmox
+    exporter reads per-container CPU from the Proxmox API with a read-only token. blackbox_exporter probes the
+    game's TCP port twice: directly, and through the public name, which goes out to the router and back in
+    through the port forward.
+  </desc>
+
+  <defs>
+    <!-- Arrowheads: the base sits at the end of the line and the tip extends past it,
+         so each line stops short of its target by the arrowhead's length. -->
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-blue-lg" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="20" markerHeight="20"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1d4ed8"/>
+    </marker>
+    <marker id="arrow-slate" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-violet" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#d97706"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="14" markerHeight="14"
+            markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#059669"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="720" height="1560" fill="#ffffff"/>
+
+  <!-- ============ INTERNET ============ -->
+  <g id="internet">
+    <text x="20" y="32" font-size="20" font-weight="600" fill="#6b7280" letter-spacing="2">INTERNET</text>
+
+    <!-- Discord -->
+    <rect x="20" y="50" width="230" height="68" rx="12" fill="#ffffff" stroke="#6ee7b7" stroke-width="2"/>
+    <text x="36" y="80" font-size="22" font-weight="700" fill="#111827">Discord channel</text>
+    <text x="36" y="106" font-size="20" fill="#6b7280">join messages</text>
+
+    <!-- Visitors -->
+    <rect x="475" y="50" width="230" height="68" rx="12" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="590" y="80" font-size="22" font-weight="700" fill="#111827" text-anchor="middle">Friends' browsers</text>
+    <text x="590" y="106" font-size="20" fill="#6b7280" text-anchor="middle">status page</text>
+  </g>
+
+  <!-- ============ CLOUDFLARE ============ -->
+  <g id="cloudflare">
+    <rect x="336" y="140" width="376" height="200" rx="16" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+    <text x="352" y="170" font-size="20" font-weight="700" fill="#374151">Cloudflare</text>
+
+    <rect x="485" y="182" width="210" height="68" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="590" y="210" font-size="22" font-weight="700" fill="#111827" text-anchor="middle">Access</text>
+    <text x="590" y="236" font-size="20" fill="#6b7280" text-anchor="middle">bypass: public paths</text>
+
+    <rect x="485" y="272" width="210" height="52" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="590" y="305" font-size="22" font-weight="700" fill="#111827" text-anchor="middle">Tunnel</text>
+  </g>
+
+  <!-- ============ HOME NETWORK ============ -->
+  <g id="home-network">
+    <rect x="6" y="400" width="708" height="900" rx="18" fill="#f3f4f6" stroke="#9ca3af" stroke-width="2"/>
+    <text x="196" y="448" font-size="22" font-weight="700" fill="#374151">Home network</text>
+
+    <!-- Router sits on the edge of the home network -->
+    <rect x="18" y="372" width="160" height="56" rx="12" fill="#ffffff" stroke="#6b7280" stroke-width="2"/>
+    <text x="98" y="408" font-size="22" font-weight="700" fill="#111827" text-anchor="middle">Router</text>
+  </g>
+
+  <!-- ============ PROXMOX VE HOST ============ -->
+  <g id="proxmox-host">
+    <rect x="16" y="462" width="690" height="822" rx="16" fill="#ffffff" stroke="#6b7280" stroke-width="2"/>
+    <text x="196" y="500" font-size="20" font-weight="700" fill="#111827">Proxmox VE host</text>
+
+    <!-- cloudflared container -->
+    <rect x="520" y="476" width="140" height="68" rx="10" fill="#ffffff" stroke="#1d4ed8" stroke-width="3"/>
+    <text x="590" y="504" font-size="22" font-weight="700" fill="#111827" text-anchor="middle">cloudflared</text>
+    <text x="590" y="530" font-size="20" fill="#6b7280" text-anchor="middle">CT 102</text>
+
+    <!-- Proxmox API lives on the host itself, outside every container -->
+    <rect x="424" y="1100" width="260" height="68" rx="10" fill="#ffffff" stroke="#6b7280" stroke-width="2"/>
+    <text x="440" y="1130" font-size="22" font-weight="700" fill="#111827">Proxmox API</text>
+    <text x="440" y="1156" font-size="20" fill="#6b7280">on the host, :8006</text>
+  </g>
+
+  <!-- ============ BEDROCK CONTAINER ============ -->
+  <g id="bedrock">
+    <rect x="60" y="566" width="290" height="692" rx="14" fill="#eff6ff" stroke="#bfdbfe" stroke-width="2"/>
+    <!-- Right-aligned so the port forward line at x=140 doesn't cross it -->
+    <text x="336" y="594" font-size="22" font-weight="700" fill="#1d4ed8" text-anchor="end">Bedrock</text>
+    <text x="336" y="620" font-size="18" fill="#6b7280" text-anchor="end">CT 105 · 10.0.0.202</text>
+
+    <rect x="74" y="640" width="262" height="68" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="90" y="670" font-size="22" font-weight="700" fill="#111827">bedrock_server</text>
+    <text x="90" y="696" font-size="20" fill="#6b7280">game port TCP :19132</text>
+
+    <rect x="74" y="740" width="262" height="68" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="90" y="770" font-size="22" font-weight="700" fill="#111827">systemd journal</text>
+    <text x="90" y="796" font-size="20" fill="#6b7280">join + leave lines</text>
+
+    <!-- Three readers of the journal -->
+    <rect x="74" y="840" width="262" height="278" rx="12" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"
+          stroke-dasharray="8 5"/>
+    <text x="88" y="866" font-size="18" font-weight="700" fill="#374151">Read the journal</text>
+
+    <rect x="88" y="880" width="234" height="68" rx="10" fill="#ffffff" stroke="#6ee7b7" stroke-width="2"/>
+    <text x="104" y="910" font-size="22" font-weight="700" fill="#111827">Discord watcher</text>
+    <text x="104" y="936" font-size="20" fill="#6b7280">follows it live</text>
+
+    <rect x="88" y="958" width="234" height="68" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="104" y="988" font-size="22" font-weight="700" fill="#111827">Player script</text>
+    <text x="104" y="1014" font-size="20" fill="#6b7280">timer, every 15s</text>
+
+    <rect x="88" y="1036" width="234" height="68" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="104" y="1066" font-size="22" font-weight="700" fill="#111827">Playtime script</text>
+    <text x="104" y="1092" font-size="20" fill="#6b7280">1 min, sessions.csv</text>
+
+    <rect x="74" y="1170" width="262" height="68" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="90" y="1200" font-size="22" font-weight="700" fill="#111827">node_exporter</text>
+    <text x="90" y="1226" font-size="20" fill="#6b7280">:9100 + textfile folder</text>
+  </g>
+
+  <!-- ============ MONITORING CONTAINER ============ -->
+  <g id="monitoring">
+    <rect x="410" y="566" width="288" height="506" rx="14" fill="#eff6ff" stroke="#bfdbfe" stroke-width="2"/>
+    <!-- Left-aligned and short so the tunnel line at x=590 doesn't cross it -->
+    <text x="424" y="594" font-size="22" font-weight="700" fill="#1d4ed8">Monitoring</text>
+    <text x="424" y="620" font-size="18" fill="#6b7280">CT 107</text>
+
+    <rect x="424" y="640" width="260" height="68" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="440" y="670" font-size="22" font-weight="700" fill="#111827">Grafana</text>
+    <text x="440" y="696" font-size="20" fill="#6b7280">10.0.0.19:3000</text>
+
+    <rect x="424" y="740" width="260" height="68" rx="10" fill="#ffffff" stroke="#475569" stroke-width="2"/>
+    <text x="440" y="770" font-size="22" font-weight="700" fill="#111827">Prometheus</text>
+    <text x="440" y="796" font-size="20" fill="#6b7280">scrapes every 15s</text>
+
+    <!-- Exporters that only listen on the container's loopback address -->
+    <rect x="424" y="840" width="260" height="204" rx="12" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"
+          stroke-dasharray="8 5"/>
+    <text x="438" y="866" font-size="18" font-weight="700" fill="#374151">Localhost only</text>
+
+    <rect x="438" y="880" width="232" height="68" rx="10" fill="#ffffff" stroke="#c4b5fd" stroke-width="2"/>
+    <text x="454" y="910" font-size="22" font-weight="700" fill="#111827">blackbox</text>
+    <text x="454" y="936" font-size="20" fill="#6b7280">exporter, :9115</text>
+
+    <rect x="438" y="962" width="232" height="68" rx="10" fill="#ffffff" stroke="#93c5fd" stroke-width="2"/>
+    <text x="454" y="992" font-size="22" font-weight="700" fill="#111827">pve-exporter</text>
+    <text x="454" y="1018" font-size="20" fill="#6b7280">read-only API token</text>
+  </g>
+
+  <!-- ============ CONNECTIONS ============ -->
+
+  <!-- Visitor path: browser to Access to Tunnel -->
+  <g id="visitor-path" stroke="#2563eb" stroke-width="3" fill="none">
+    <line x1="590" y1="118" x2="590" y2="168" marker-end="url(#arrow-blue)"/>
+    <line x1="590" y1="250" x2="590" y2="258" marker-end="url(#arrow-blue)"/>
+  </g>
+
+  <!-- cloudflared opens the tunnel OUTWARD to Cloudflare, then hands requests to Grafana -->
+  <g id="outbound-tunnel">
+    <line x1="590" y1="476" x2="590" y2="344" stroke="#1d4ed8" stroke-width="5" marker-end="url(#arrow-blue-lg)"/>
+    <line x1="590" y1="544" x2="590" y2="626" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)"/>
+    <rect x="500" y="352" width="180" height="58" rx="29" fill="#ffffff" stroke="#1d4ed8" stroke-width="2"/>
+    <text x="590" y="376" font-size="18" font-weight="700" fill="#1d4ed8" text-anchor="middle">Outbound tunnel</text>
+    <text x="590" y="399" font-size="18" fill="#4b5563" text-anchor="middle">(no inbound ports)</text>
+  </g>
+
+  <!-- Prometheus scrapes (arrows point the way each request goes) -->
+  <g id="scrapes" stroke="#475569" stroke-width="3" fill="none">
+    <!-- Grafana queries Prometheus -->
+    <line x1="554" y1="708" x2="554" y2="726" marker-end="url(#arrow-slate)"/>
+    <!-- Prometheus scrapes the local exporters -->
+    <line x1="554" y1="808" x2="554" y2="826" marker-end="url(#arrow-slate)"/>
+    <!-- Prometheus scrapes node_exporter on the game server, through the gap between containers -->
+    <path d="M424,774 H396 V1204 H350" marker-end="url(#arrow-slate)"/>
+  </g>
+  <text x="566" y="824" font-size="18" fill="#475569">scrape</text>
+
+  <!-- pve-exporter reads the Proxmox API -->
+  <line x1="554" y1="1030" x2="554" y2="1086" stroke="#475569" stroke-width="3" marker-end="url(#arrow-slate)"/>
+
+  <!-- Inside the game server: server writes the journal, readers consume it -->
+  <g id="log-flow" stroke="#2563eb" stroke-width="3" fill="none">
+    <line x1="205" y1="708" x2="205" y2="726" marker-end="url(#arrow-blue)"/>
+    <line x1="205" y1="808" x2="205" y2="826" marker-end="url(#arrow-blue)"/>
+    <line x1="120" y1="1118" x2="120" y2="1156" marker-end="url(#arrow-blue)"/>
+  </g>
+  <text x="132" y="1148" font-size="18" fill="#1d4ed8">writes .prom files</text>
+
+  <!-- blackbox probes, drawn over the scrape line with a white underlay so the crossing reads cleanly -->
+  <g id="probes" fill="none">
+    <path d="M438,902 H380 V414 H192" stroke="#ffffff" stroke-width="9"/>
+    <path d="M438,926 H364 V674 H350" stroke="#ffffff" stroke-width="9"/>
+    <!-- Probe through the public name: out to the router, then back in -->
+    <path d="M438,902 H380 V414 H192" stroke="#7c3aed" stroke-width="3" stroke-dasharray="9 6"
+          marker-end="url(#arrow-violet)"/>
+    <!-- Direct probe on the home network -->
+    <path d="M438,926 H364 V674 H350" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrow-violet)"/>
+  </g>
+
+  <!-- Router port forward carries the public probe back in -->
+  <line x1="140" y1="428" x2="140" y2="626" stroke="#d97706" stroke-width="3" stroke-dasharray="9 6"
+        marker-end="url(#arrow-amber)"/>
+  <text x="152" y="540" font-size="18" font-weight="700" fill="#b45309">port forward</text>
+
+  <!-- Discord webhook: out through the router to Discord -->
+  <g id="webhook" stroke="#059669" stroke-width="3" fill="none">
+    <path d="M88,914 H38 V442" marker-end="url(#arrow-green)"/>
+    <line x1="38" y1="372" x2="38" y2="132" marker-end="url(#arrow-green)"/>
+  </g>
+  <text x="52" y="226" font-size="20" font-weight="700" fill="#047857">Webhook</text>
+  <text x="52" y="252" font-size="20" fill="#047857">(HTTPS POST)</text>
+
+  <!-- ============ LEGEND ============ -->
+  <g id="legend">
+    <text x="20" y="1340" font-size="20" font-weight="700" fill="#374151">Legend</text>
+
+    <line x1="20" y1="1374" x2="62" y2="1374" stroke="#1d4ed8" stroke-width="5" marker-end="url(#arrow-blue-lg)"/>
+    <text x="100" y="1381" font-size="20" fill="#374151">Visitor path and server log flow</text>
+
+    <line x1="20" y1="1412" x2="68" y2="1412" stroke="#475569" stroke-width="3" marker-end="url(#arrow-slate)"/>
+    <text x="100" y="1419" font-size="20" fill="#374151">Prometheus scrape or Grafana query</text>
+
+    <line x1="20" y1="1450" x2="68" y2="1450" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrow-violet)"/>
+    <text x="100" y="1457" font-size="20" fill="#374151">Port probe, direct (dashed: via public name)</text>
+
+    <line x1="20" y1="1488" x2="68" y2="1488" stroke="#d97706" stroke-width="3" stroke-dasharray="9 6"
+          marker-end="url(#arrow-amber)"/>
+    <text x="100" y="1495" font-size="20" fill="#374151">Router port forward</text>
+
+    <line x1="20" y1="1526" x2="68" y2="1526" stroke="#059669" stroke-width="3" marker-end="url(#arrow-green)"/>
+    <text x="100" y="1533" font-size="20" fill="#374151">Discord webhook (outbound)</text>
+  </g>
+</svg>

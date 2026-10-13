@@ -103,6 +103,15 @@ export const projects: Project[] = [
     status: 'In Progress',
     content: minecraftServerDashboard,
     parent: 'minecraft-bedrock-server',
+    diagrams: [
+      {
+        slug: 'data-flow',
+        title: 'How the dashboard gets its data',
+        description: 'The visitor path through Cloudflare, the Prometheus scrapes, the server log readers, the two port probes, and the Discord webhook.',
+        src: '/images/minecraft-dashboard-diagram.svg',
+        alt: 'Diagram of the status dashboard: visitors reach Grafana through Cloudflare Access and an outbound Cloudflare Tunnel, Grafana queries Prometheus, Prometheus scrapes blackbox_exporter, the Proxmox exporter and node_exporter on the game server, scripts and a Discord watcher read the game server\'s systemd journal, blackbox_exporter probes the game port directly and through the router\'s port forward, and the watcher posts joins to Discord through a webhook',
+      },
+    ],
   },
   {
     slug: 'photo-gallery',
