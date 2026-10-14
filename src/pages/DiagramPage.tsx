@@ -33,9 +33,15 @@ const DiagramPage: React.FC = () => {
         />
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 text-sm">
-          <a href={diagram.src} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-900 underline underline-offset-4">
-            Open full size
-          </a>
+          <div className="flex gap-4">
+            <a href={diagram.src} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-900 underline underline-offset-4">
+              Open full size
+            </a>
+            {/* A PNG copy, since phones can't save an SVG to their photos or send it in a message. */}
+            <a href={diagram.src.replace(/\.svg$/, '.png')} target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-gray-900 underline underline-offset-4">
+              Save as image
+            </a>
+          </div>
           {next !== diagram && (
             <Link to={`/projects/${project.slug}/diagrams/${next.slug}`} className="font-medium text-blue-600 hover:text-blue-800">
               Next: {next.title} →

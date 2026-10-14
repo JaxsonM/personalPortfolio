@@ -58,6 +58,18 @@ const ZoomableImage: React.FC<{ src?: string; alt?: string }> = ({ src, alt = ''
             >
               Open full size
             </a>
+            {/* Diagrams are SVGs, which phones can't save to their photos or send in a message, so offer the PNG copy. */}
+            {src?.endsWith('.svg') && (
+              <a
+                href={src.replace(/\.svg$/, '.png')}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-sm text-white/80 hover:text-white underline underline-offset-4 self-center"
+              >
+                Save as image
+              </a>
+            )}
             <button
               type="button"
               onClick={() => setOpen(false)}
