@@ -1,8 +1,8 @@
 ## Overview
 
-A public status page for our Minecraft Bedrock server, showing who's online, all-time playtime, when each player was last seen, and how hard the server is working. A Discord webhook posts in our group chat whenever someone joins.
+A public status page for our Minecraft Bedrock server, showing who's online and for how long, all-time playtime, when each player was last seen, and how hard the server is working, with a link to the [live world map](/projects/minecraft-world-map) at the top. A Discord webhook posts in our group chat whenever someone joins.
 
-**TODO:** add a screenshot of the dashboard here, showing the online players, playtime, and Server Resources panels.
+**TODO:** add a screenshot of the dashboard here, taken while someone is online, showing the map link, the Players online table with session times, playtime, and the Server Resources panel. Blur the gamertags.
 
 It's part of my [Minecraft Bedrock server](/projects/minecraft-bedrock-server) project, alongside the [live world map](/projects/minecraft-world-map). I chose to self-host it with Prometheus and Grafana instead of a cloud service, because running a real monitoring stack is exactly the kind of experience I wanted from this lab.
 
@@ -71,11 +71,23 @@ The tricky part is a session that never gets a leave line, because the server st
 
 The script also bookmarks its place in the journal with a **cursor**, and only moves the bookmark after a run succeeds. If something fails, the next run retries the same lines instead of skipping them, and running it twice over the same lines never counts a session twice.
 
+### Current session time
+
+The Players online table shows each player's name and how long their current session has lasted, with the number of players in its footer.
+
+The playtime script doesn't publish how long each session has lasted. It publishes when each online player's session **started**, as `minecraft_player_session_start_timestamp_seconds`, and Grafana subtracts that from the current time every time the dashboard refreshes. The script only runs once a minute, so a duration it wrote would already be out of date by the time anyone saw it. A start time never goes stale.
+
+That's a choice between computing a value when the data is written and computing it when it's read. All-time playtime is computed when writing: the script adds up the sessions once a minute and stores the totals. Session time is computed when reading, fresh on every view.
+
+The table combines two sources that update on different schedules: the list of who's online every 15 seconds, and the start times every minute. The query covers the gaps in both directions. It only keeps start times for players who are still in the online list, so someone who just left disappears right away. Anyone who's online but too new to have a start time yet shows as "just joined."
+
+One known quirk: if someone leaves and rejoins within the same minute, the table shows their old session time until the script's next run.
+
 ### Publishing a public dashboard safely
 
 The dashboard is served through my Cloudflare Tunnel like my other sites, so no ports were opened. Grafana's sign-in and settings pages live on the same hostname, so I couldn't make the whole site public. Cloudflare Access protects everything on the dashboard's hostname, and a second, more specific Access application with a Bypass policy covers only the paths the public dashboard uses: `/public-dashboards`, `/api/public`, and `/public`. When two Access applications match a request, Cloudflare applies the more specific one, so visitors can see the dashboard but can't reach anything else.
 
-On the Grafana side, I used its **Share externally** feature, which publishes a read-only copy of one dashboard at a long, unguessable link. Visitors can view it and change the time range, but they can't edit it, see other dashboards, or run their own queries. That's how the feature is designed, so it didn't need any extra settings to lock it down. I set Grafana's `root_url` to the public address so the links it generates point to the right place, and saved the dashboard with a 30 second auto-refresh so nobody needs to reload.
+On the Grafana side, I used its **Share externally** feature, which publishes a read-only copy of one dashboard at a long, unguessable link. Visitors can view it and change the time range, but they can't edit it, see other dashboards, or run their own queries. That's how the feature is designed, so it didn't need any extra settings to lock it down. I set Grafana's `root_url` to the public address so the links it generates point to the right place, and saved the dashboard with a 30 second auto-refresh so nobody needs to reload. The link to the world map at the top is a Markdown link in a Text panel. I chose that over Grafana's built-in dashboard links because I wasn't sure those would show up on the public copy.
 
 The long link isn't something anyone would type, so a Cloudflare redirect rule sends the bare hostname to it. Cloudflare runs redirect rules before Access, so the redirect happens first, and the Bypass policy then lets the request through.
 
@@ -111,7 +123,8 @@ I installed the Proxmox exporter and it worked, but on the Proxmox host instead 
 
 - **A table that only showed one player.** A table panel fed by a time series query showed one row. The query's format needed to be set to Table instead of Time series, so each player became a row.
 - **Gamertags that turned into NaN.** I set a unit on the whole panel, so Grafana tried to treat the gamertag column as a number too. Moving the unit to a per-field override on just the numeric columns fixed it.
-- **Building Who's Online with nobody online.** It's hard to build a panel for online players when nobody's playing, so I wrote some test data into the metrics file to see how the panel would look.
+- **Building Players online with nobody online.** Grafana only lets you configure the fields that exist in the current query results, so with nobody playing, there was nothing to set up. I stopped both timers, wrote a fake player into both metric files, built the panel against that, and then restarted the timers, which overwrote the fake data.
+- **A footer that wouldn't behave.** I only wanted a player count under the Player column, but the Session column kept showing one too. In this Grafana version, footer calculations are set per column, and an override with no calculation selected doesn't mean "no calculation." It means "not set," so the column kept following the panel-wide default. The fix was to flip it: no footer by default, and an override that turns it on for the Player column only. Like the NaN problem above, the lesson was about defaults and overrides: a panel-wide setting applies to every column unless an override actually sets something different.
 - **A memory graph that looked jumpy.** Memory seemed to swing up and down until I looked at the axis: it was auto-scaling from 32.00% to 32.16%. The line was nearly flat. Always read the axis before reading the shape.
 
 ## Reading the graphs
@@ -125,5 +138,5 @@ The two measure different things. CPU is the work being done right now. Memory i
 - **Alerts:** notify me on Discord when the server is down, or when memory climbs steadily for days.
 - **Confirm the CPU root cause:** read the container's idle counter twice, 10 seconds apart, to check whether LXCFS is really what made the in-container CPU numbers wrong.
 - **A death log** on the dashboard.
-- **Link the dashboard and the [world map](/projects/minecraft-world-map)** to each other.
+- **A link back from the [world map](/projects/minecraft-world-map)** to the dashboard. The dashboard already links to the map.
 - **Host temperatures and closet temperature**, so the dashboard covers the hardware too.

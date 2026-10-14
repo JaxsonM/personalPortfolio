@@ -2,7 +2,11 @@
 
 A public, zoomable map of our Minecraft Bedrock world. The terrain updates every hour, players show up as live dots that move on their own, and the same pipeline keeps a backup of the world every 6 hours.
 
-**TODO:** add a screenshot of the map here, with shadows, block textures, and a few live player dots visible.
+![Screenshot of the world map: forests, lakes and coastline around the spawn island in the top left, a snowy biome on the right with one live player dot labeled with its coordinates, and plain white squares along the bottom and right edges where nobody has explored yet](/images/world-map-screenshot.webp)
+
+The red pin in the top left marks the world's spawn point, where new players first appear. The dot on the right is a friend who was online when I took the screenshot, labeled with their gamertag (blurred here) and their X, Y and Z coordinates. It moves as they play.
+
+The map can only draw areas that someone has explored, because Minecraft doesn't generate terrain until a player gets near it. The plain white squares along the bottom and right edges are areas nobody has visited yet. The textured white area on the right is real terrain, a snowy biome.
 
 Bedrock has no plugin system, so there's no off-the-shelf "live map" to install. This is built from a map renderer, a few Bash scripts, systemd timers, and the server's own console. It's part of my [Minecraft Bedrock server](/projects/minecraft-bedrock-server) project, alongside the [status dashboard](/projects/minecraft-server-dashboard).
 
