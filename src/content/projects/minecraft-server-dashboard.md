@@ -2,7 +2,9 @@
 
 A public status page for our Minecraft Bedrock server, showing who's online and for how long, all-time playtime, when each player was last seen, and how hard the server is working, with a link to the [live world map](/projects/minecraft-world-map) at the top. A Discord webhook posts in our group chat whenever someone joins.
 
-**TODO:** add a screenshot of the dashboard here, taken while someone is online, showing the map link, the Players online table with session times, playtime, and the Server Resources panel. Blur the gamertags.
+![Screenshot of the Grafana dashboard: a link to the live world map at the top, then panels for players online with session time, all-time playtime per player, players over time, last seen, server CPU and memory, and the server's status checked directly and through its public name, both showing Online](/images/dashboard-screenshot.png)
+
+From the top: the link to the world map, who's online right now and for how long, everyone's all-time playtime, player count over the day, when each player was last seen, the server's CPU and memory, and the two port checks described below. Gamertags are blurred here.
 
 It's part of my [Minecraft Bedrock server](/projects/minecraft-bedrock-server) project, alongside the [live world map](/projects/minecraft-world-map). I chose to self-host it with Prometheus and Grafana instead of a cloud service, because running a real monitoring stack is exactly the kind of experience I wanted from this lab.
 
