@@ -4,9 +4,9 @@
   <desc id="diagram-desc">
     PC and mobile players look up mc.sophisticants.com in Cloudflare DNS, which answers with the home
     public IP. The record is DNS only, not proxied, because Cloudflare's proxy only handles web traffic.
-    Xbox players set their DNS to BedrockConnect at 104.238.130.180 with 8.8.8.8 as a backup. Joining a
+    Console players (Xbox and Switch) set their DNS to BedrockConnect at 104.238.130.180 with 8.8.8.8 as a backup. Joining a
     featured server opens BedrockConnect's server list instead, where the player enters the server address.
-    BedrockConnect then transfers the player, and the Xbox connects directly to the home server on the same
+    BedrockConnect then transfers the player, and the console connects directly to the home server on the same
     path as PC players, so BedrockConnect is not in the gameplay path. Both paths reach the Xfinity gateway,
     where CyberSecure blocks IPs on threat reputation lists, then port forwards send TCP 19132 and UDP
     19140 to 19155 to the bedrock container, CT 105 at 10.0.0.202, on the Proxmox host. The server signs in
@@ -88,7 +88,7 @@
     <text x="180" y="658" font-size="20" fill="#6b7280" text-anchor="middle">Path A</text>
 
     <rect x="370" y="596" width="300" height="176" rx="12" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
-    <text x="520" y="630" font-size="22" font-weight="700" fill="#111827" text-anchor="middle">Xbox players</text>
+    <text x="520" y="630" font-size="22" font-weight="700" fill="#111827" text-anchor="middle">Console players</text>
     <text x="520" y="658" font-size="20" fill="#6b7280" text-anchor="middle">Path B</text>
     <text x="420" y="700" font-size="20" fill="#111827">Manual DNS:</text>
     <text x="420" y="726" font-size="20" fill="#4b5563">104.238.130.180</text>
@@ -247,7 +247,7 @@
     <text x="100" y="2355" font-size="20" fill="#374151">DNS lookup and answer</text>
 
     <line x1="20" y1="2386" x2="68" y2="2386" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrow-violet)"/>
-    <text x="100" y="2393" font-size="20" fill="#374151">BedrockConnect handoff (Xbox only)</text>
+    <text x="100" y="2393" font-size="20" fill="#374151">BedrockConnect handoff (consoles only)</text>
 
     <line x1="20" y1="2424" x2="68" y2="2424" stroke="#d97706" stroke-width="3" stroke-dasharray="9 6"
           marker-end="url(#arrow-amber)"/>
@@ -259,6 +259,6 @@
 
     <circle cx="44" cy="2500" r="17" fill="#6b7280"/>
     <text x="44" y="2506" font-size="18" font-weight="700" fill="#ffffff" text-anchor="middle">A1</text>
-    <text x="100" y="2507" font-size="20" fill="#374151">Steps: A = PC/mobile, B = Xbox, N = NetherNet</text>
+    <text x="100" y="2507" font-size="20" fill="#374151">Steps: A = PC/mobile, B = console, N = NetherNet</text>
   </g>
 </svg>

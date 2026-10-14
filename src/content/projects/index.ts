@@ -71,9 +71,9 @@ export const projects: Project[] = [
       {
         slug: 'network',
         title: 'How players connect',
-        description: 'PC and Xbox connection paths, the home gateway, and NetherNet\'s two-phase connection.',
+        description: 'PC and console connection paths, the home gateway, and NetherNet\'s two-phase connection.',
         src: '/images/minecraft-network-diagram.svg',
-        alt: 'Diagram of how PC and Xbox players reach the Bedrock server through Cloudflare DNS or BedrockConnect, the Xfinity gateway port forwards, and the Proxmox container, plus the TCP handshake and UDP gameplay phases',
+        alt: 'Diagram of how PC and console players reach the Bedrock server through Cloudflare DNS or BedrockConnect, the Xfinity gateway port forwards, and the Proxmox container, plus the TCP handshake and UDP gameplay phases',
       },
       {
         slug: 'container',
@@ -90,7 +90,7 @@ export const projects: Project[] = [
     summary:
       'A public, zoomable map of the world, rendered hourly from consistent snapshots of the live server, with live player positions and tiered world backups every 6 hours.',
     tags: ['uNmINeD', 'Bash', 'systemd timers', 'Caddy', 'Cloudflare Tunnel', 'Proxmox VE'],
-    status: 'In Progress',
+    status: 'Complete',
     content: minecraftWorldMap,
     parent: 'minecraft-bedrock-server',
     diagrams: [
@@ -107,9 +107,9 @@ export const projects: Project[] = [
     slug: 'minecraft-server-dashboard',
     title: 'Server Status Dashboard',
     summary:
-      'A public Prometheus and Grafana dashboard showing who\'s online, all-time playtime, and server health, plus Discord notifications when a player joins.',
+      'A public Prometheus and Grafana dashboard showing who\'s online and for how long, all-time playtime, and server health, with a link to the live world map and Discord notifications when a player joins.',
     tags: ['Prometheus', 'Grafana', 'node_exporter', 'blackbox_exporter', 'Bash', 'Cloudflare Access'],
-    status: 'In Progress',
+    status: 'Complete',
     content: minecraftServerDashboard,
     parent: 'minecraft-bedrock-server',
     diagrams: [

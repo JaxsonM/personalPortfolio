@@ -18,7 +18,7 @@ This page covers the server itself. Two later additions have their own write-ups
 
 ## Diagrams
 
-- [How players connect](/projects/minecraft-bedrock-server/diagrams/network): PC and Xbox connection paths, the home gateway, and NetherNet's two-phase connection
+- [How players connect](/projects/minecraft-bedrock-server/diagrams/network): PC and console connection paths, the home gateway, and NetherNet's two-phase connection
 - [Inside the server container](/projects/minecraft-bedrock-server/diagrams/container): the systemd service, the DDNS and health check timers, the admin path, and the security layers
 
 ## How it's built

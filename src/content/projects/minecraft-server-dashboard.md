@@ -23,8 +23,6 @@ It's part of my [Minecraft Bedrock server](/projects/minecraft-bedrock-server) p
 
 - [How the dashboard gets its data](/projects/minecraft-server-dashboard/diagrams/data-flow): the visitor path through Cloudflare, the Prometheus scrapes, the server log readers, the two port probes, and the Discord webhook
 
-To keep the diagram readable, it leaves out two scrape targets: Prometheus scraping itself, and the monitoring container's own node_exporter. Both are listed in the table below.
-
 ## How it's built
 
 ### Prometheus and its sources
@@ -138,7 +136,6 @@ The two measure different things. CPU is the work being done right now. Memory i
 ## What's next
 
 - **Alerts:** notify me on Discord when the server is down, or when memory climbs steadily for days.
-- **Confirm the CPU root cause:** read the container's idle counter twice, 10 seconds apart, to check whether LXCFS is really what made the in-container CPU numbers wrong.
 - **A death log** on the dashboard.
 - **A link back from the [world map](/projects/minecraft-world-map)** to the dashboard. The dashboard already links to the map.
 - **Host temperatures and closet temperature**, so the dashboard covers the hardware too.
